@@ -1,0 +1,236 @@
+package view;
+
+import model.AccionPoker;
+import model.BotAgresivo;
+import model.BotConservador;
+import model.CombinacionPoker;
+import model.Carta;
+import model.JuegoPoker;
+import model.Jugador;
+import model.JugadorBot;
+import model.JugadorHumano;
+import model.ResultadoRonda;
+import javafx.application.Application;
+import javafx.geometry.Insets;
+import javafx.geometry.Pos;
+import javafx.scene.Scene;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.stage.Stage;
+
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * Ventana principal de la aplicación, conectada a la lógica real de JuegoPoker.
+ *  - Arriba: los dos bots + etiqueta de turno actual
+ *  - Centro: la mesa (cartas comunitarias + pozo)
+ *  - Abajo: el jugador humano y los controles de apuesta
+ */
+public class VentanaPrincipal extends Application {
+
+    private JuegoPoker juego;
+    private JugadorHumano jugadorHumano;
+    private JugadorBot bot1;
+    private JugadorBot bot2;
+
+    private PanelJugador panelHumano;
+    private PanelJugador panelBot1;
+    private PanelJugador panelBot2;
+    private PanelMesa panelMesa;
+    private PanelControles controles;
+    private Label lblTurno;
+
+    @Override
+    public void start(Stage stage) {
+        jugadorHumano = new JugadorHumano("Jugador", 500);
+        bot1 = new JugadorBot("Bot Conservador", 500, new BotConservador());
+        bot2 = new JugadorBot("Bot Agresivo", 500, new BotAgresivo());
+
+        juego = new JuegoPoker(List.of(jugadorHumano, bot1, bot2));
+
+        panelMesa = new PanelMesa();
+
+        panelBot1 = new PanelJugador(bot1);
+        panelBot2 = new PanelJugador(bot2);
+        HBox filaBots = new HBox(20, panelBot1, panelBot2);
+        filaBots.setAlignment(Pos.CENTER);
+
+        lblTurno = new Label("Turno de: -");
+        lblTurno.setTextFill(Color.WHITE);
+        lblTurno.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
+
+        VBox arriba = new VBox(8, filaBots, lblTurno);
+        arriba.setAlignment(Pos.CENTER);
+        arriba.setPadding(new Insets(10));
+
+        panelHumano = new PanelJugador(jugadorHumano);
+        controles = new PanelControles();
+        controles.setOnAccion(this::onAccionHumana);
+
+        Button btnNuevaRonda = new Button("Nueva ronda");
+        btnNuevaRonda.setOnAction(e -> iniciarNuevaRonda());
+
+        HBox filaHumano = new HBox(20, panelHumano, controles, btnNuevaRonda);
+        filaHumano.setAlignment(Pos.CENTER);
+        filaHumano.setPadding(new Insets(10));
+
+        BorderPane raiz = new BorderPane();
+        raiz.setTop(arriba);
+        raiz.setCenter(panelMesa);
+        raiz.setBottom(filaHumano);
+        raiz.setStyle("-fx-background-color: #0a3d24;");
+
+        Scene escena = new Scene(raiz, 850, 680);
+        stage.setTitle("Póker de Fichas");
+        stage.setScene(escena);
+        stage.show();
+
+        iniciarNuevaRonda();
+    }
+
+    private void iniciarNuevaRonda() {
+        juego.iniciarRonda();
+        refrescarUI();
+    }
+
+    private void onAccionHumana(AccionPoker accion, int monto) {
+        Map<Jugador, Integer> saldosAntes = capturarSaldos();
+        try {
+            juego.procesarAccion(jugadorHumano, accion, monto);
+        } catch (IllegalStateException | IllegalArgumentException ex) {
+            mostrarError(ex.getMessage());
+            return;
+        }
+        refrescarUI();
+        revisarFinDeRonda(saldosAntes);
+    }
+
+    private Map<Jugador, Integer> capturarSaldos() {
+        Map<Jugador, Integer> saldos = new HashMap<>();
+        for (Jugador j : juego.getJugadores()) {
+            saldos.put(j, j.getSaldoFichas());
+        }
+        return saldos;
+    }
+
+    /** Sincroniza todos los paneles (incluida la etiqueta de turno) con el estado actual de JuegoPoker. */
+    private void refrescarUI() {
+        panelHumano.actualizarDesde(jugadorHumano);
+        panelBot1.actualizarDesde(bot1);
+        panelBot2.actualizarDesde(bot2);
+        panelMesa.actualizarPozo(juego.getBote());
+
+        List<Carta> comunitarias = juego.getCartasComunitarias();
+        String[] textos = comunitarias.stream().map(Carta::toString).toArray(String[]::new);
+        panelMesa.actualizarCartasComunitarias(textos);
+
+        controles.setApuestaActual(juego.getApuestaActual());
+        controles.setSaldoDisponible(jugadorHumano.getSaldoFichas());
+
+        Jugador actual = juego.getJugadorActual();
+        lblTurno.setText(actual != null ? "Turno de: " + actual.getNombre() : "Ronda terminada");
+
+        boolean esTurnoHumano = actual == jugadorHumano;
+        controles.setDisable(!esTurnoHumano);
+    }
+
+    /**
+     * Revisa si la ronda terminó y muestra el resultado.
+     * Hay dos caminos porque JuegoPoker maneja ambos casos de forma distinta:
+     *  - SHOWDOWN: hay que llamar resolverRonda() para evaluar manos (sí sabemos la combinación ganadora).
+     *  - Retiro de los demás: el bote ya se asignó dentro de JuegoPoker; se detecta comparando
+     *    el saldo de cada jugador antes/después de la acción (no hay combinación que mostrar).
+     */
+    private void revisarFinDeRonda(Map<Jugador, Integer> saldosAntes) {
+        if (!juego.isRondaTerminada()) {
+            return;
+        }
+
+        if ("SHOWDOWN".equals(juego.getFaseActual())) {
+            ResultadoRonda resultado = juego.resolverRonda();
+            if (resultado != null) {
+                mostrarFinDeRonda(resultado.getGanador().getNombre(),
+                        resultado.getFichasGanadas(), resultado.getCombinacionGanadora());
+            }
+        } else {
+            Jugador ganador = null;
+            int fichasGanadas = 0;
+            for (Jugador j : juego.getJugadores()) {
+                int antes = saldosAntes.getOrDefault(j, j.getSaldoFichas());
+                int despues = j.getSaldoFichas();
+                if (despues > antes) {
+                    ganador = j;
+                    fichasGanadas = despues - antes;
+                }
+            }
+            String nombreGanador = ganador != null ? ganador.getNombre() : "Nadie";
+            mostrarFinDeRonda(nombreGanador, fichasGanadas, null);
+        }
+        refrescarUI();
+    }
+
+    /**
+     * Arma y muestra el mensaje de fin de ronda: quién ganó, cuántas fichas, y el ranking
+     * completo de combinaciones de póker de mayor a menor poder, señalando cuál fue la ganadora.
+     * Si combinacionGanadora es null (se ganó por retiro de los demás), se muestra el ranking
+     * completo igual mas sin marcar ninguna, porque no hubo comparación de manos.
+     */
+    private void mostrarFinDeRonda(String nombreGanador, int fichasGanadas, CombinacionPoker combinacionGanadora) {
+        StringBuilder mensaje = new StringBuilder();
+        if (combinacionGanadora != null) {
+            mensaje.append(nombreGanador).append(" gana la ronda con ")
+                    .append(nombreLegible(combinacionGanadora))
+                    .append(" y se lleva ").append(fichasGanadas).append(" fichas.\n\n");
+        } else {
+            mensaje.append(nombreGanador).append(" gana la ronda (los demás se retiraron) y se lleva ")
+                    .append(fichasGanadas).append(" fichas.\n\n");
+        }
+
+        mensaje.append("Ranking de manos (de más a menos poderosa):\n");
+        List<CombinacionPoker> combinaciones = Arrays.asList(CombinacionPoker.values());
+        Collections.reverse(combinaciones); // de ESCALERA_REAL a CARTA_ALTA
+        for (CombinacionPoker combinacion : combinaciones) {
+            boolean esGanadora = combinacion == combinacionGanadora;
+            mensaje.append(esGanadora ? "⭐ " : "    ")
+                    .append(nombreLegible(combinacion))
+                    .append(esGanadora ? "   ← GANADORA" : "")
+                    .append("\n");
+        }
+
+        Alert alerta = new Alert(Alert.AlertType.INFORMATION, mensaje.toString());
+        alerta.setHeaderText("Fin de la ronda");
+        alerta.getDialogPane().setPrefWidth(380);
+        alerta.showAndWait();
+    }
+
+    /** Nombre en español y con acentos para mostrar cada combinación en la GUI. */
+    private String nombreLegible(CombinacionPoker combinacion) {
+        return switch (combinacion) {
+            case CARTA_ALTA -> "Carta Alta";
+            case PAR -> "Par";
+            case DOS_PARES -> "Dos Pares";
+            case TRIO -> "Trío";
+            case ESCALERA -> "Escalera";
+            case COLOR -> "Color";
+            case FULL -> "Full";
+            case POKER -> "Póker";
+            case ESCALERA_COLOR -> "Escalera de Color";
+            case ESCALERA_REAL -> "Escalera Real";
+        };
+    }
+
+    private void mostrarError(String mensaje) {
+        Alert alerta = new Alert(Alert.AlertType.ERROR, mensaje);
+        alerta.setHeaderText("Acción no válida");
+        alerta.showAndWait();
+    }
+}
