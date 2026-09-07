@@ -1,77 +1,52 @@
 package com.una.pokerdefichas.modelo;
 
-import com.una.pokerdefichas.juego.EstrategiaApuesta;
+/**Representa a un jugador controlado automáticamente por el programa.
+  Utiliza una estrategia de apuesta para decidir sus acciones.*/
 
-/*
- * Representa a un jugador controlado por la computadora.
- *
- * Hereda de la clase abstracta Jugador.
- * Además, posee una estrategia que determina
- * cómo debe comportarse durante las apuestas.
- */
 public class JugadorBot extends Jugador {
 
-    /*
-     * Estrategia utilizada por el bot.
-     *
-     * Puede ser BotConservador, BotAgresivo
-     * u otra estrategia que se cree posteriormente.
-     */
     private EstrategiaApuesta estrategia;
 
-    /*
-     * Constructor del jugador bot.
-     *
-     * @param nombre nombre del bot
-     * @param saldoFichasIniciales fichas iniciales
-     * @param estrategia estrategia que utilizará
-     */
-    public JugadorBot(
-            String nombre,
-            int saldoFichasIniciales,
-            EstrategiaApuesta estrategia
-    ) {
+    /**Crea un nuevo jugador bot y el seteo de las acciones*/
 
-        /*
-         * Llama al constructor de Jugador.
-         */
+    public JugadorBot(String nombre, int saldoFichasIniciales,
+                      EstrategiaApuesta estrategia) {
+
         super(nombre, saldoFichasIniciales);
 
-        /*
-         * Guarda la estrategia seleccionada.
-         */
+        if (estrategia == null) {
+            throw new IllegalArgumentException(
+                    "La estrategia del bot no puede ser null"
+            );
+        }
+
         this.estrategia = estrategia;
     }
 
-    /*
-     * Obtiene la estrategia actual del bot.
-     */
+    /**Cambia la estrategia utilizada por el bot.
+     estrategia nueva estrategia */
+
+    public void setEstrategia(EstrategiaApuesta estrategia) {
+
+        if (estrategia == null) {
+            throw new IllegalArgumentException(
+                    "La estrategia del bot no puede ser null"
+            );
+        }
+
+        this.estrategia = estrategia;
+    }
+
+    /**Obtiene la estrategia actual del bot.*/
+
     public EstrategiaApuesta getEstrategia() {
         return estrategia;
     }
 
-    /*
-     * Permite cambiar la estrategia del bot.
-     */
-    public void setEstrategia(EstrategiaApuesta estrategia) {
-        this.estrategia = estrategia;
-    }
+    /**Decide qué acción realizar durante su turno.*/
 
-    /*
-     * Decide qué acción realizará el bot.
-     *
-     * La decisión se delega a la estrategia.
-     */
     @Override
-    public AccionPoker decidirAccion(
-            int apuestaActual,
-            int boteActual
-    ) {
-
-        return estrategia.decidirAccion(
-                this,
-                apuestaActual,
-                boteActual
-        );
+    public AccionPoker decidirAccion(int apuestaActual, int boteActual) {
+        return estrategia.decidirAccion(apuestaActual, boteActual);
     }
 }
