@@ -1,62 +1,24 @@
 package com.una.pokerdefichas.modelo;
 
-/*
- * Representa al jugador humano.
- *
- * Hereda de la clase abstracta Jugador.
- *
- * La acción del jugador humano será seleccionada
- * posteriormente mediante los botones de la interfaz gráfica.
- */
+/**Representa a un jugador controlado por una persona
+ * mediante la interfaz gráfica*/
+
 public class JugadorHumano extends Jugador {
 
-    /*
-     * Guarda la acción seleccionada por el jugador.
-     */
-    private AccionPoker accionSeleccionada;
+    /**Crea un jugador humano.*/
 
-    /*
-     * Constructor del jugador humano.
-     *
-     * @param nombre nombre del jugador
-     * @param saldoFichasIniciales fichas iniciales
-     */
-    public JugadorHumano(
-            String nombre,
-            int saldoFichasIniciales
-    ) {
-
-        /*
-         * Inicializa los atributos heredados
-         * de la clase Jugador.
-         */
+    public JugadorHumano(String nombre, int saldoFichasIniciales) {
         super(nombre, saldoFichasIniciales);
-
-        /*
-         * Al comenzar todavía no existe una acción.
-         */
-        this.accionSeleccionada = null;
     }
 
-    /*
-     * Guarda la acción que seleccionó el jugador.
-     *
-     * Posteriormente la interfaz gráfica utilizará
-     * este método cuando el usuario presione un botón.
-     */
-    public void seleccionarAccion(AccionPoker accion) {
-        this.accionSeleccionada = accion;
-    }
-
-    /*
-     * Devuelve la acción seleccionada por el jugador.
+    /**La decisión del jugador humano no se realiza automáticamente.
+     * La interfaz gráfica será la encargada de obtener la acción
+     * seleccionada por el usuario y enviarla al juego.
      */
     @Override
-    public AccionPoker decidirAccion(
-            int apuestaActual,
-            int boteActual
-    ) {
-
-        return accionSeleccionada;
+    public AccionPoker decidirAccion(int apuestaActual, int boteActual) {
+        throw new UnsupportedOperationException(
+                "La acción del jugador humano debe seleccionarse desde la interfaz"
+        );
     }
 }
