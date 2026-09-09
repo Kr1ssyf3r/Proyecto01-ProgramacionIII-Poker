@@ -19,6 +19,7 @@ public class JuegoPoker implements Jugable {
     private Map<Jugador, Integer> apuestasJugador; // cuánto ha apostado cada uno en la ronda actual
     private Set<Jugador> jugadoresRetirados;
     private Map<Jugador, List<Carta>> cartasPrivadas; // almacena las 2 cartas de cada jugador
+    private Set<Jugador> yaActuaron; // Registro de quién ya actuó en esta ronda de apuestas
 
     // Enumeración interna para las fases del juego
     private enum Fase {
@@ -45,6 +46,7 @@ public class JuegoPoker implements Jugable {
         this.apuestasJugador = new HashMap<>();
         this.jugadoresRetirados = new HashSet<>();
         this.cartasPrivadas = new HashMap<>();
+        this.yaActuaron = new HashSet<>();
     }
 
     // --- Métodos públicos de la interfaz Jugable ---
@@ -63,6 +65,7 @@ public class JuegoPoker implements Jugable {
         apuestasJugador.clear();
         jugadoresRetirados.clear();
         cartasPrivadas.clear();
+        yaActuaron.clear();
         fase = Fase.PREFLOP;
 
         // Repartir 2 cartas privadas a cada jugador
@@ -122,6 +125,9 @@ public class JuegoPoker implements Jugable {
                 bote += totalApuesta;
                 apuestaActual = subida;
                 apuestasJugador.put(jugador, subida);
+                // REABRE LA ACCIÓN: todos los demás deben volver a actuar
+                yaActuaron.clear();
+                yaActuaron.add(jugador);
                 break;
 
             default:
@@ -133,6 +139,11 @@ public class JuegoPoker implements Jugable {
             jugadoresRetirados.add(jugador);
         }
 
+        // Si no fue RAISE, añadir el jugador a los que ya actuaron
+        if (accion != AccionPoker.RAISE) {
+            yaActuaron.add(jugador);
+        }
+
         // Avanzar al siguiente turno después de procesar la acción
         siguienteTurno();
     }
@@ -142,12 +153,26 @@ public class JuegoPoker implements Jugable {
         // Si la ronda ya terminó, no hacer nada
         if (rondaTerminada) return;
 
-        // Primero, verificar si solo queda un jugador activo
-        long activos = jugadores.stream().filter(Jugador::isActivo).count();
+        // Verificar si la ronda de apuestas debe terminar
+        if (rondaApuestasTerminada()) {
+            rondaTerminada = true;
+            avanzarFase();
+            return;
+        }
+
+        // Primero, verificar si solo queda un jugador activo (no retirado)
+        long activos = jugadores.stream()
+                .filter(Jugador::isActivo)
+                .filter(j -> !jugadoresRetirados.contains(j))
+                .count();
+
         if (activos <= 1) {
             // Terminar la ronda y repartir el bote al único activo
             rondaTerminada = true;
-            Jugador ganador = jugadores.stream().filter(Jugador::isActivo).findFirst().orElse(null);
+            Jugador ganador = jugadores.stream()
+                    .filter(Jugador::isActivo)
+                    .filter(j -> !jugadoresRetirados.contains(j))
+                    .findFirst().orElse(null);
             if (ganador != null) {
                 ganador.agregarFichas(bote);
                 bote = 0;
@@ -156,38 +181,87 @@ public class JuegoPoker implements Jugable {
         }
 
         // Encontrar el siguiente jugador activo que no se haya retirado
+        // y que aún no haya actuado en esta ronda
+        Jugador siguiente = null;
         int contador = 0;
         do {
             turnoActual = (turnoActual + 1) % jugadores.size();
             contador++;
             if (contador > jugadores.size()) {
-                // Todos los jugadores han pasado, terminar la ronda de apuestas
+                // Si todos los activos ya actuaron, la ronda debería terminar
+                // pero ya lo verificamos con rondaApuestasTerminada()
                 rondaTerminada = true;
                 avanzarFase();
                 return;
             }
-        } while (!jugadores.get(turnoActual).isActivo() ||
-                jugadoresRetirados.contains(jugadores.get(turnoActual)));
+            Jugador candidato = jugadores.get(turnoActual);
+            if (candidato.isActivo() && !jugadoresRetirados.contains(candidato)) {
+                // Si aún no ha actuado en esta ronda, es el siguiente
+                if (!yaActuaron.contains(candidato)) {
+                    siguiente = candidato;
+                    break;
+                }
+            }
+        } while (siguiente == null);
 
-        Jugador actual = jugadores.get(turnoActual);
+        if (siguiente == null) {
+            // No debería ocurrir, pero por seguridad
+            rondaTerminada = true;
+            avanzarFase();
+            return;
+        }
 
         // Si el jugador actual es un bot, tomar decisión automática
-        if (actual instanceof JugadorBot) {
-            AccionPoker accion = actual.decidirAccion(apuestaActual, bote);
+        if (siguiente instanceof JugadorBot) {
+            AccionPoker accion = siguiente.decidirAccion(apuestaActual, bote);
             int cantidad = 0;
             if (accion == AccionPoker.RAISE) {
                 // Subida simple: doblar la apuesta actual (o mínimo)
                 cantidad = apuestaActual * 2;
-                if (cantidad > actual.getSaldoFichas()) cantidad = actual.getSaldoFichas();
+                if (cantidad > siguiente.getSaldoFichas()) cantidad = siguiente.getSaldoFichas();
                 if (cantidad <= apuestaActual) cantidad = apuestaActual + 10; // fallback
             }
             // Procesar la acción del bot (esto llamará a siguienteTurno nuevamente)
-            procesarAccion(actual, accion, cantidad);
+            procesarAccion(siguiente, accion, cantidad);
             // Nota: procesarAccion llama a siguienteTurno(), por lo que los bots seguirán actuando
             // hasta que toque a un humano o termine la ronda.
         }
         // Si es humano, el método se detiene y el controlador debe llamar a procesarAccion cuando el usuario decida.
         // No hacemos nada más.
+    }
+
+    /**
+     * Verifica si la ronda de apuestas actual ha terminado.
+     * Condiciones:
+     * 1. Todos los jugadores activos han actuado (están en yaActuaron).
+     * 2. Todos los activos tienen su apuesta igual a apuestaActual (o apuestaActual == 0).
+     */
+    private boolean rondaApuestasTerminada() {
+        List<Jugador> activos = jugadores.stream()
+                .filter(Jugador::isActivo)
+                .filter(j -> !jugadoresRetirados.contains(j))
+                .toList();
+
+        if (activos.isEmpty()) return true;
+
+        // Verificar que todos los activos hayan actuado
+        boolean todosActuaron = yaActuaron.containsAll(activos);
+        if (!todosActuaron) return false;
+
+        // Verificar que todos los activos tengan la apuesta igual a la actual
+        if (apuestaActual == 0) {
+            // Si no hay apuesta, con que todos hayan actuado (hicieron CHECK) basta
+            return true;
+        } else {
+            // Todos deben haber igualado la apuestaActual
+            for (Jugador j : activos) {
+                int apostado = apuestasJugador.getOrDefault(j, 0);
+                if (apostado != apuestaActual) {
+                    return false;
+                }
+            }
+            return true;
+        }
     }
 
     @Override
@@ -196,6 +270,8 @@ public class JuegoPoker implements Jugable {
         if (turnoActual < 0 || turnoActual >= jugadores.size()) return null;
         Jugador j = jugadores.get(turnoActual);
         if (!j.isActivo() || jugadoresRetirados.contains(j)) return null;
+        // Si el jugador ya actuó, no es su turno (por seguridad)
+        if (yaActuaron.contains(j)) return null;
         return j;
     }
 
@@ -302,6 +378,7 @@ public class JuegoPoker implements Jugable {
         // Si no es SHOWDOWN, comenzar nueva ronda de apuestas
         if (fase != Fase.SHOWDOWN) {
             rondaTerminada = false;
+            yaActuaron.clear();
             // Buscar el primer jugador activo para comenzar la siguiente ronda
             for (int i = 0; i < jugadores.size(); i++) {
                 if (jugadores.get(i).isActivo() && !jugadoresRetirados.contains(jugadores.get(i))) {
@@ -332,6 +409,7 @@ public class JuegoPoker implements Jugable {
     private void reiniciarApuestas() {
         apuestaActual = 0;
         apuestasJugador.clear();
+        yaActuaron.clear();
         // Los jugadores que no se retiraron siguen activos
         // Los retirados permanecen en el set
     }
