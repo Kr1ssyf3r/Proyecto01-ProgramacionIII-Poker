@@ -1,15 +1,6 @@
 package view;
 
-import model.AccionPoker;
-import model.BotAgresivo;
-import model.BotConservador;
-import model.CombinacionPoker;
-import model.Carta;
-import model.JuegoPoker;
-import model.Jugador;
-import model.JugadorBot;
-import model.JugadorHumano;
-import model.ResultadoRonda;
+import model.*;
 import javafx.application.Application;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -23,11 +14,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Ventana principal de la aplicación, conectada a la lógica real de JuegoPoker.
@@ -128,6 +115,14 @@ public class VentanaPrincipal extends Application {
         panelBot1.actualizarDesde(bot1);
         panelBot2.actualizarDesde(bot2);
         panelMesa.actualizarPozo(juego.getBote());
+
+        // Solo se muestran las cartas del jugador humano; las de los bots quedan ocultas.
+        List<Carta> misCartas = juego.getCartasPrivadas(jugadorHumano);
+        if (!misCartas.isEmpty()) {
+            String textoCartas = misCartas.stream().map(Carta::toString)
+                    .reduce((a, b) -> a + "  " + b).orElse("");
+            panelHumano.actualizarCartas(textoCartas);
+        }
 
         List<Carta> comunitarias = juego.getCartasComunitarias();
         String[] textos = comunitarias.stream().map(Carta::toString).toArray(String[]::new);

@@ -351,6 +351,21 @@ public class JuegoPoker implements Jugable {
         return fase.name();
     }
 
+    @Override
+    public List<Carta> getCartasPrivadas(Jugador jugador) {
+        List<Carta> privadas = cartasPrivadas.get(jugador);
+        return privadas != null ? new ArrayList<>(privadas) : new ArrayList<>();
+    }
+
+    /**
+     * @return copia del historial de acciones procesadas en la ronda actual, en orden.
+     *         Se reinicia en cada iniciarRonda(). Pensado para que la GUI narre
+     *         con calma lo que hicieron los bots en vez de solo ver el resultado final.
+     */
+    public List<RegistroAccion> getHistorial() {
+        return new ArrayList<>(historial);
+    }
+
     // --- Métodos auxiliares privados ---
 
     /**

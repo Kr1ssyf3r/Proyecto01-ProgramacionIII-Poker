@@ -70,4 +70,12 @@ public interface Jugable {
      * @return la fase actual del juego (PREFLOP, FLOP, TURN, RIVER, SHOWDOWN)
      */
     String getFaseActual();
+
+    /**
+     * @param jugador el jugador cuyas cartas privadas se quieren consultar
+     * @return las 2 cartas privadas repartidas a ese jugador en la ronda actual,
+     *         o una lista vacía si todavía no se le han repartido cartas
+     */
+    List<Carta> getCartasPrivadas(Jugador jugador);
 }
+
