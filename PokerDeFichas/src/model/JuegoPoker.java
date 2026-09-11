@@ -20,6 +20,7 @@ public class JuegoPoker implements Jugable {
     private Set<Jugador> jugadoresRetirados;
     private Map<Jugador, List<Carta>> cartasPrivadas; // almacena las 2 cartas de cada jugador
     private Set<Jugador> yaActuaron; // Registro de quién ya actuó en esta ronda de apuestas
+    private List<RegistroAccion> historial; // Registro de todas las acciones de la ronda, en orden
 
     // Enumeración interna para las fases del juego
     private enum Fase {
@@ -47,6 +48,7 @@ public class JuegoPoker implements Jugable {
         this.jugadoresRetirados = new HashSet<>();
         this.cartasPrivadas = new HashMap<>();
         this.yaActuaron = new HashSet<>();
+        this.historial = new ArrayList<>();
     }
 
     // --- Métodos públicos de la interfaz Jugable ---
@@ -66,6 +68,7 @@ public class JuegoPoker implements Jugable {
         jugadoresRetirados.clear();
         cartasPrivadas.clear();
         yaActuaron.clear();
+        historial.clear();
         fase = Fase.PREFLOP;
 
         // Repartir 2 cartas privadas a cada jugador
@@ -90,6 +93,7 @@ public class JuegoPoker implements Jugable {
         }
 
         // Procesar según la acción
+        int montoRegistro = 0; //Para el registro
         switch (accion) {
             case CHECK:
                 if (apuestaActual > 0 && apuestasJugador.getOrDefault(jugador, 0) < apuestaActual) {
@@ -105,6 +109,7 @@ public class JuegoPoker implements Jugable {
                 jugador.apostar(aPagar);
                 bote += aPagar;
                 apuestasJugador.put(jugador, apuestaActual);
+                montoRegistro = apuestaActual; //Registro
                 break;
 
             case FOLD:
@@ -122,6 +127,7 @@ public class JuegoPoker implements Jugable {
                     throw new IllegalStateException("Saldo insuficiente para RAISE");
                 }
                 jugador.apostar(totalApuesta);
+                montoRegistro = subida; //Registro
                 bote += totalApuesta;
                 apuestaActual = subida;
                 apuestasJugador.put(jugador, subida);
@@ -133,6 +139,7 @@ public class JuegoPoker implements Jugable {
             default:
                 throw new IllegalArgumentException("Acción no soportada: " + accion);
         }
+        historial.add(new RegistroAccion(jugador, accion, montoRegistro)); //Aquí es donde realmente se guarda el registro de la jugada que se acaba de procesar (sea de un humano o un bot).
 
         // Si el jugador se retiró o se quedó sin fichas, lo marcamos
         if (!jugador.tieneFichas()) {

@@ -13,7 +13,10 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.stage.Stage;
-
+import javafx.animation.PauseTransition;
+import javafx.animation.SequentialTransition;
+import javafx.util.Duration;
+import javafx.application.Platform;
 import java.util.*;
 
 /**
@@ -35,6 +38,9 @@ public class VentanaPrincipal extends Application {
     private PanelMesa panelMesa;
     private PanelControles controles;
     private Label lblTurno;
+    private Label lblNarracion;
+    private int ultimoIndiceHistorial = 0;
+    private static final Duration PAUSA_ENTRE_JUGADAS = Duration.seconds(2.0);
 
     @Override
     public void start(Stage stage) {
@@ -55,7 +61,11 @@ public class VentanaPrincipal extends Application {
         lblTurno.setTextFill(Color.WHITE);
         lblTurno.setStyle("-fx-font-size: 16px; -fx-font-weight: bold;");
 
-        VBox arriba = new VBox(8, filaBots, lblTurno);
+        lblNarracion = new Label(" ");
+        lblNarracion.setTextFill(Color.LIGHTYELLOW);
+        lblNarracion.setStyle("-fx-font-size: 14px; -fx-font-style: italic;");
+
+        VBox arriba = new VBox(6, filaBots, lblTurno, lblNarracion);
         arriba.setAlignment(Pos.CENTER);
         arriba.setPadding(new Insets(10));
 
@@ -85,8 +95,9 @@ public class VentanaPrincipal extends Application {
     }
 
     private void iniciarNuevaRonda() {
+        ultimoIndiceHistorial = 0;
         juego.iniciarRonda();
-        refrescarUI();
+        narrarNuevasJugadas(this::refrescarUI);
     }
 
     private void onAccionHumana(AccionPoker accion, int monto) {
@@ -97,9 +108,64 @@ public class VentanaPrincipal extends Application {
             mostrarError(ex.getMessage());
             return;
         }
-        refrescarUI();
-        revisarFinDeRonda(saldosAntes);
+        narrarNuevasJugadas(() -> {
+            refrescarUI();
+            revisarFinDeRonda(saldosAntes);
+        });
     }
+
+    /**
+     * Muestra, una por una y con pausa entre cada una, las jugadas de los BOTS que
+     * ocurrieron desde la última vez que se revisó el historial (la del jugador humano
+     * no se narra porque ya se ve reflejada en sus propios botones). Al terminar,
+     * ejecuta alTerminar (normalmente refrescarUI + revisar fin de ronda).
+     */
+    private void narrarNuevasJugadas(Runnable alTerminar) {
+        List<RegistroAccion> historialCompleto = juego.getHistorial();
+        List<RegistroAccion> nuevas = historialCompleto.subList(ultimoIndiceHistorial, historialCompleto.size());
+        ultimoIndiceHistorial = historialCompleto.size();
+
+        List<RegistroAccion> jugadasDeBots = nuevas.stream()
+                .filter(r -> r.jugador() instanceof JugadorBot)
+                .toList();
+
+        if (jugadasDeBots.isEmpty()) {
+            if (alTerminar != null) alTerminar.run();
+            return;
+        }
+
+        controles.setDisable(true); // que no se pueda jugar mientras se narra
+        SequentialTransition secuencia = new SequentialTransition();
+        for (RegistroAccion registro : jugadasDeBots) {
+            PauseTransition pausa = new PauseTransition(PAUSA_ENTRE_JUGADAS);
+            pausa.setOnFinished(e -> lblNarracion.setText(describirJugada(registro)));
+            secuencia.getChildren().add(pausa);
+        }
+
+        // Pausa extra SOLO para que el último mensaje también se alcance a leer;
+        // si no, se muestra y se limpia en el mismo instante (bug: nunca se ve
+        // la jugada del último bot en actuar).
+        secuencia.getChildren().add(new PauseTransition(PAUSA_ENTRE_JUGADAS));
+        secuencia.setOnFinished(e -> {
+
+            lblNarracion.setText(" ");
+            if (alTerminar != null) {
+                Platform.runLater(alTerminar);
+            }
+        });
+        secuencia.play();
+    }
+
+        /** Arma el texto explicativo de una jugada de bot, para que se entienda qué y por qué. */
+        private String describirJugada(RegistroAccion registro) {
+            String nombre = registro.jugador().getNombre();
+            return switch (registro.accion()) {
+                case CHECK -> nombre + " pasa (check): no hay apuesta que igualar.";
+                case CALL -> nombre + " iguala (call) con " + registro.monto() + " fichas.";
+                case RAISE -> nombre + " sube (raise) la apuesta a " + registro.monto() + " fichas.";
+                case FOLD -> nombre + " se retira (fold): la apuesta le pareció demasiado alta.";
+            };
+        }
 
     private Map<Jugador, Integer> capturarSaldos() {
         Map<Jugador, Integer> saldos = new HashMap<>();
