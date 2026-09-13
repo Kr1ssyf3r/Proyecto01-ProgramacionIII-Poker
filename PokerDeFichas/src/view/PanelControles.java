@@ -33,6 +33,9 @@ public class PanelControles extends HBox {
     private int saldoDisponible = 0;
     private int apuestaActual = 0;
 
+/**
+ * Crea una nueva instancia de PanelControles con los datos recibidos.
+ */
     public PanelControles() {
         setSpacing(10);
         setPadding(new Insets(12));
@@ -55,28 +58,35 @@ public class PanelControles extends HBox {
         getChildren().addAll(campoMonto, btnCheck, btnCall, btnRaise, btnFold);
     }
 
-    /** Registra quién debe enterarse cuando el jugador confirme una acción válida. */
+/**
+ * Registra el receptor que será notificado cuando el usuario confirme una acción.
+ * @param listener valor utilizado por el método para realizar su operación.
+ */
     public void setOnAccion(OnAccion listener) {
         this.listener = listener;
     }
 
-    /** Debe llamarse cada vez que cambie el saldo del jugador humano en turno. */
+/**
+ * Actualiza la cantidad de fichas disponibles del jugador humano.
+ * @param saldoDisponible valor utilizado por el método para realizar su operación.
+ */
     public void setSaldoDisponible(int saldoDisponible) {
         this.saldoDisponible = saldoDisponible;
     }
 
-    /**
-     * Debe llamarse cada vez que cambie la apuesta más alta vigente en la ronda.
-     * También habilita/deshabilita Check y Call según corresponda:
-     * Check solo es válido si apuestaActual es 0; Call no aplica si apuestaActual es 0
-     * (no hay nada que igualar todavía).
-     */
+/**
+ * Actualiza la apuesta vigente y ajusta el estado de los botones de control.
+ * @param apuestaActual valor utilizado por el método para realizar su operación.
+ */
     public void setApuestaActual(int apuestaActual) {
         this.apuestaActual = apuestaActual;
         btnCheck.setDisable(apuestaActual != 0);
         btnCall.setDisable(apuestaActual == 0);
     }
 
+/**
+ * Confirma la acción CHECK después de validar el estado actual de los controles.
+ */
     private void confirmarCheck() {
         if (apuestaActual != 0) {
             mostrarError("No podés hacer check: ya hay una apuesta de " + apuestaActual + " en la mesa.");
@@ -85,6 +95,9 @@ public class PanelControles extends HBox {
         notificar(AccionPoker.CHECK, 0);
     }
 
+/**
+ * Confirma la acción CALL después de validar el monto requerido y el saldo disponible.
+ */
     private void confirmarCall() {
         if (apuestaActual == 0) {
             mostrarError("No hay ninguna apuesta que igualar todavía.");
@@ -99,6 +112,9 @@ public class PanelControles extends HBox {
         notificar(AccionPoker.CALL, apuestaActual);
     }
 
+/**
+ * Valida y confirma una subida de apuesta introducida por el usuario.
+ */
     private void confirmarRaise() {
         int monto;
         try {
@@ -123,10 +139,18 @@ public class PanelControles extends HBox {
         notificar(AccionPoker.RAISE, monto);
     }
 
+/**
+ * Confirma la acción de retirarse de la ronda.
+ */
     private void confirmarFold() {
         notificar(AccionPoker.FOLD, 0);
     }
 
+/**
+ * Notifica al controlador de la interfaz la acción confirmada y su monto asociado.
+ * @param accion valor utilizado por el método para realizar su operación.
+ * @param monto valor utilizado por el método para realizar su operación.
+ */
     private void notificar(AccionPoker accion, int monto) {
         if (listener != null) {
             listener.ejecutar(accion, monto);
@@ -137,6 +161,10 @@ public class PanelControles extends HBox {
         campoMonto.clear();
     }
 
+/**
+ * Muestra un mensaje de error al usuario mediante un diálogo de JavaFX.
+ * @param mensaje valor utilizado por el método para realizar su operación.
+ */
     private void mostrarError(String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.ERROR, mensaje);
         alerta.setHeaderText("Acción no válida");
