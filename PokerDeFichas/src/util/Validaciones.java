@@ -18,15 +18,17 @@ package util;
 public class Validaciones {
 
     // Evita que alguien intente instanciar esta clase (solo tiene métodos estáticos)
+/**
+ * Crea una nueva instancia de Validaciones con los datos recibidos.
+ */
     private Validaciones() {
     }
 
-    /**
-     * Valida que el monto de una apuesta sea mayor a cero.
-     *
-     * @param monto cantidad de fichas que el jugador quiere apostar
-     * @throws ApuestaInvalidaException si el monto es cero o negativo
-     */
+/**
+ * Valida que el monto recibido sea mayor que cero.
+ * @param monto valor utilizado por el método para realizar su operación.
+ * @throws ApuestaInvalidaException si los datos recibidos no cumplen las reglas requeridas.
+ */
     public static void validarMontoPositivo(int monto) throws ApuestaInvalidaException {
         if (monto <= 0) {
             throw new ApuestaInvalidaException(
@@ -35,13 +37,12 @@ public class Validaciones {
         }
     }
 
-    /**
-     * Valida que el jugador tenga fichas suficientes para cubrir el monto.
-     *
-     * @param monto           cantidad de fichas que el jugador quiere apostar
-     * @param saldoDisponible fichas actuales del jugador
-     * @throws SaldoInsuficienteException si el saldo no alcanza para cubrir el monto
-     */
+/**
+ * Valida que el saldo disponible sea suficiente para cubrir el monto indicado.
+ * @param monto valor utilizado por el método para realizar su operación.
+ * @param saldoDisponible valor utilizado por el método para realizar su operación.
+ * @throws SaldoInsuficienteException si los datos recibidos no cumplen las reglas requeridas.
+ */
     public static void validarSaldoSuficiente(int monto, int saldoDisponible) throws SaldoInsuficienteException {
         if (monto > saldoDisponible) {
             throw new SaldoInsuficienteException(
@@ -51,32 +52,23 @@ public class Validaciones {
         }
     }
 
-    /**
-     * Valida una apuesta completa: monto positivo y saldo suficiente.
-     * Es el método que normalmente se llama desde la GUI antes de
-     * enviar la acción a la lógica del juego.
-     *
-     * @param monto           cantidad de fichas que el jugador quiere apostar
-     * @param saldoDisponible fichas actuales del jugador
-     * @throws ApuestaInvalidaException   si el monto no es válido
-     * @throws SaldoInsuficienteException si el saldo no alcanza
-     */
+/**
+ * Valida conjuntamente que la apuesta sea positiva y que el jugador tenga saldo suficiente.
+ * @param monto valor utilizado por el método para realizar su operación.
+ * @param saldoDisponible valor utilizado por el método para realizar su operación.
+ */
     public static void validarApuesta(int monto, int saldoDisponible)
             throws ApuestaInvalidaException, SaldoInsuficienteException {
         validarMontoPositivo(monto);
         validarSaldoSuficiente(monto, saldoDisponible);
     }
 
-    /**
-     * Valida que una subida ("subir") sea estrictamente mayor a la apuesta actual de la mesa,
-     * además de cumplir las validaciones normales de monto y saldo.
-     *
-     * @param nuevoMonto      monto que el jugador propone para subir
-     * @param apuestaActual   apuesta más alta vigente en la ronda
-     * @param saldoDisponible fichas actuales del jugador
-     * @throws ApuestaInvalidaException   si el nuevo monto no supera la apuesta actual, o no es válido
-     * @throws SaldoInsuficienteException si el saldo no alcanza
-     */
+/**
+ * Valida que la nueva apuesta sea válida y superior a la apuesta actual.
+ * @param nuevoMonto valor utilizado por el método para realizar su operación.
+ * @param apuestaActual valor utilizado por el método para realizar su operación.
+ * @param saldoDisponible valor utilizado por el método para realizar su operación.
+ */
     public static void validarSubida(int nuevoMonto, int apuestaActual, int saldoDisponible)
             throws ApuestaInvalidaException, SaldoInsuficienteException {
         validarApuesta(nuevoMonto, saldoDisponible);
