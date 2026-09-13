@@ -11,10 +11,19 @@ package util;
  */
 public class SaldoInsuficienteException extends Exception {
 
+/**
+ * Crea una nueva instancia de SaldoInsuficienteException con los datos recibidos.
+ * @param mensaje valor utilizado por el método para realizar su operación.
+ */
     public SaldoInsuficienteException(String mensaje) {
         super(mensaje);
     }
 
+/**
+ * Crea una nueva instancia de SaldoInsuficienteException con los datos recibidos.
+ * @param mensaje valor utilizado por el método para realizar su operación.
+ * @param causa valor utilizado por el método para realizar su operación.
+ */
     public SaldoInsuficienteException(String mensaje, Throwable causa) {
         super(mensaje, causa);
     }
