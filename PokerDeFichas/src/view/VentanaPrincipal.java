@@ -1,5 +1,8 @@
 package view;
 
+import juego.BotAgresivo;
+import juego.BotConservador;
+import juego.JuegoPoker;
 import model.*;
 import javafx.application.Application;
 import javafx.geometry.Insets;

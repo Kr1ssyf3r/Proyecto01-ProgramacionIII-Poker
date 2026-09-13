@@ -1,5 +1,7 @@
 package model;
 
+import juego.EstrategiaApuesta;
+
 /**Representa a un jugador controlado automáticamente por el programa.
   Utiliza una estrategia de apuesta para decidir sus acciones.*/
 

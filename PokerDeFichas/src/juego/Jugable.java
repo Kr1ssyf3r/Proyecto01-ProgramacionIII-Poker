@@ -1,4 +1,9 @@
-package model;
+package juego;
+
+import model.AccionPoker;
+import model.Carta;
+import model.Jugador;
+import model.ResultadoRonda;
 
 import java.util.List;
 

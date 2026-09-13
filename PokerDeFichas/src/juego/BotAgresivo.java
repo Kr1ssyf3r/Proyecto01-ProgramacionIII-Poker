@@ -1,7 +1,9 @@
-package model;
+package juego;
 
 
- /** El bot intenta aumentar la apuesta cuando puede.*/
+import model.AccionPoker;
+
+/** El bot intenta aumentar la apuesta cuando puede.*/
 public class BotAgresivo implements EstrategiaApuesta {
 
     @Override

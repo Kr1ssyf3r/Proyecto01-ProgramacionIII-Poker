@@ -1,4 +1,6 @@
-package model;
+package juego;
+
+import model.*;
 
 import java.util.*;
 

@@ -1,5 +1,7 @@
-package model;
+package juego;
 
+
+import model.AccionPoker;
 
 public interface EstrategiaApuesta {
 
