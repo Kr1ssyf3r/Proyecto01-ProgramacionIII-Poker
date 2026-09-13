@@ -1,4 +1,4 @@
-package model;
+zpackage model;
 
 import juego.EstrategiaApuesta;
 
@@ -9,8 +9,13 @@ public class JugadorBot extends Jugador {
 
     private EstrategiaApuesta estrategia;
 
-    /**Crea un nuevo jugador bot y el seteo de las acciones*/
-
+    /**
+     * Construye un jugador bot con un nombre, un saldo inicial y una estrategia de apuestas.
+     * @param nombre nombre que identificará al jugador bot en la partida.
+     * @param saldoFichasIniciales cantidad inicial de fichas del jugador.
+     * @param estrategia estrategia que utilizará el bot para decidir sus acciones.
+     * @throws IllegalArgumentException si la estrategia recibida es null.
+     */
     public JugadorBot(String nombre, int saldoFichasIniciales,
                       EstrategiaApuesta estrategia) {
 
@@ -25,8 +30,10 @@ public class JugadorBot extends Jugador {
         this.estrategia = estrategia;
     }
 
-    /**Cambia la estrategia utilizada por el bot.
-     estrategia nueva estrategia */
+/**
+ * Cambia la estrategia de apuestas utilizada por el bot.
+ * @param estrategia valor utilizado por el método para realizar su operación.
+ */
 
     public void setEstrategia(EstrategiaApuesta estrategia) {
 
@@ -39,7 +46,10 @@ public class JugadorBot extends Jugador {
         this.estrategia = estrategia;
     }
 
-    /**Obtiene la estrategia actual del bot.*/
+/**
+ * Obtiene la estrategia de apuestas configurada para el bot.
+ * @return valor calculado o recuperado por el método.
+ */
 
     public EstrategiaApuesta getEstrategia() {
         return estrategia;
@@ -47,6 +57,12 @@ public class JugadorBot extends Jugador {
 
     /**Decide qué acción realizar durante su turno.*/
 
+/**
+ * Determina la acción que debe realizar el jugador o bot según la apuesta y el bote actuales.
+ * @param apuestaActual valor utilizado por el método para realizar su operación.
+ * @param boteActual valor utilizado por el método para realizar su operación.
+ * @return valor calculado o recuperado por el método.
+ */
     @Override
     public AccionPoker decidirAccion(int apuestaActual, int boteActual) {
         return estrategia.decidirAccion(apuestaActual, boteActual);
