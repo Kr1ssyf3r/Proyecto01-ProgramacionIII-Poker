@@ -10,10 +10,19 @@ package util;
  */
 public class ApuestaInvalidaException extends Exception {
 
+/**
+ * Crea una nueva instancia de ApuestaInvalidaException con los datos recibidos.
+ * @param mensaje valor utilizado por el método para realizar su operación.
+ */
     public ApuestaInvalidaException(String mensaje) {
         super(mensaje);
     }
 
+/**
+ * Crea una nueva instancia de ApuestaInvalidaException con los datos recibidos.
+ * @param mensaje valor utilizado por el método para realizar su operación.
+ * @param causa valor utilizado por el método para realizar su operación.
+ */
     public ApuestaInvalidaException(String mensaje, Throwable causa) {
         super(mensaje, causa);
     }
