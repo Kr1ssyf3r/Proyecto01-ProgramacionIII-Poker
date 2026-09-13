@@ -23,6 +23,9 @@ public class PanelMesa extends VBox {
     private final Label lblPozo;
     private final FlowPane cartasComunitarias;
 
+/**
+ * Crea una nueva instancia de PanelMesa con los datos recibidos.
+ */
     public PanelMesa() {
         setSpacing(10);
         setPadding(new Insets(16));
@@ -44,12 +47,18 @@ public class PanelMesa extends VBox {
         getChildren().addAll(titulo, cartasComunitarias, lblPozo);
     }
 
-    /** Actualiza el monto del pozo mostrado en la mesa. */
+/**
+ * Actualiza el texto que muestra el monto actual del pozo.
+ * @param nuevoPozo valor utilizado por el método para realizar su operación.
+ */
     public void actualizarPozo(int nuevoPozo) {
         lblPozo.setText("Pozo: " + nuevoPozo);
     }
 
-    /** Muestra las cartas comunitarias reveladas hasta ahora (lista vacía en PREFLOP). */
+/**
+ * Actualiza el panel visual con las cartas comunitarias disponibles.
+ * @param cartas valor utilizado por el método para realizar su operación.
+ */
     public void actualizarCartasComunitarias(List<Carta> cartas) {
         cartasComunitarias.getChildren().clear();
         for (Carta carta : cartas) {
