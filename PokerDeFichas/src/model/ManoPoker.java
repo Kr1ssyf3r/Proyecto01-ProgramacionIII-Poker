@@ -14,11 +14,10 @@ public class ManoPoker {
 
     // --- Constructores ---
 
-    /**
-     * Constructor para una mano de exactamente 5 cartas.
-     * @param cartas lista de 5 cartas
-     * @throws IllegalArgumentException si no son exactamente 5
-     */
+/**
+ * Crea una nueva instancia de ManoPoker con los datos recibidos.
+ * @param cartas valor utilizado por el método para realizar su operación.
+ */
     public ManoPoker(List<Carta> cartas) {
         if (cartas.size() != 5) {
             throw new IllegalArgumentException("La mano debe tener exactamente 5 cartas");
@@ -28,13 +27,11 @@ public class ManoPoker {
         evaluarYCalcularDesempate();
     }
 
-    /**
-     * Constructor para Texas Hold'em: recibe entre 5 y 7 cartas (2 privadas + comunitarias)
-     * y elige la mejor combinación de 5 cartas.
-     * @param cartas lista de cartas (5 a 7)
-     * @param esTexasHoldem debe ser true para usar este constructor
-     * @throws IllegalArgumentException si el tamaño no está entre 5 y 7
-     */
+/**
+ * Crea una nueva instancia de ManoPoker con los datos recibidos.
+ * @param cartas valor utilizado por el método para realizar su operación.
+ * @param esTexasHoldem valor utilizado por el método para realizar su operación.
+ */
     public ManoPoker(List<Carta> cartas, boolean esTexasHoldem) {
         if (!esTexasHoldem) {
             throw new IllegalArgumentException("Usa el otro constructor para 5 cartas");
@@ -51,13 +48,18 @@ public class ManoPoker {
 
     // --- Métodos privados auxiliares ---
 
+/**
+ * Ordena las cartas de la mano de acuerdo con su valor para facilitar la evaluación.
+ */
     private void ordenarPorValor() {
         this.cartas.sort(Comparator.comparingInt(Carta::getValor));
     }
 
-    /**
-     * Genera todas las combinaciones de 5 cartas de una lista de 7 y devuelve la mejor.
-     */
+/**
+ * Genera las combinaciones posibles de cinco cartas y selecciona la mejor mano disponible.
+ * @param todas valor utilizado por el método para realizar su operación.
+ * @return valor calculado o recuperado por el método.
+ */
     private List<Carta> encontrarMejorManoDe5(List<Carta> todas) {
         List<List<Carta>> combinaciones = new ArrayList<>();
         int n = todas.size();
@@ -92,17 +94,17 @@ public class ManoPoker {
 
     // --- Evaluación principal ---
 
-    /**
-     * Evalúa la mano y devuelve la combinación más alta.
-     * @return CombinacionPoker correspondiente
-     */
+/**
+ * Evalúa la mano y determina la combinación de póker correspondiente.
+ * @return valor calculado o recuperado por el método.
+ */
     public CombinacionPoker evaluar() {
         return tipo;
     }
 
-    /**
-     * Calcula el tipo de mano y los valores para desempate.
-     */
+/**
+ * Evalúa la combinación y prepara los valores necesarios para resolver empates entre manos.
+ */
     private void evaluarYCalcularDesempate() {
         if (esEscaleraReal()) {
             tipo = CombinacionPoker.ESCALERA_REAL;
@@ -137,20 +139,29 @@ public class ManoPoker {
         }
     }
 
-    /**
-     * Devuelve el valor de la carta más alta (para desempates simples).
-     */
+/**
+ * Obtiene el valor de la carta más alta de la mano.
+ * @return valor calculado o recuperado por el método.
+ */
     public int getValorAlto() {
         return cartas.get(cartas.size() - 1).getValor();
     }
 
     // --- Métodos de verificación de combinaciones ---
 
+/**
+ * Comprueba si las cinco cartas pertenecen al mismo palo.
+ * @return true si se cumple la condición evaluada; false en caso contrario.
+ */
     private boolean esColor() {
         Palo primero = cartas.get(0).getPalo();
         return cartas.stream().allMatch(c -> c.getPalo() == primero);
     }
 
+/**
+ * Comprueba si los valores de las cartas forman una secuencia consecutiva.
+ * @return true si se cumple la condición evaluada; false en caso contrario.
+ */
     private boolean esEscalera() {
         // Escalera normal: valores consecutivos
         for (int i = 0; i < cartas.size() - 1; i++) {
@@ -169,15 +180,27 @@ public class ManoPoker {
         return true;
     }
 
+/**
+ * Comprueba si la mano corresponde a una escalera real.
+ * @return true si se cumple la condición evaluada; false en caso contrario.
+ */
     private boolean esEscaleraReal() {
         return esColor() && esEscalera() &&
                 cartas.get(0).getValor() == 10 && cartas.get(4).getValor() == 14;
     }
 
+/**
+ * Comprueba si la mano corresponde a una escalera de color.
+ * @return true si se cumple la condición evaluada; false en caso contrario.
+ */
     private boolean esEscaleraColor() {
         return esColor() && esEscalera() && !esEscaleraReal();
     }
 
+/**
+ * Calcula la frecuencia de cada valor presente en la mano.
+ * @return resultado de tipo Integer>.
+ */
     private Map<Integer, Integer> obtenerFrecuencias() {
         Map<Integer, Integer> frec = new HashMap<>();
         for (Carta c : cartas) {
@@ -186,31 +209,55 @@ public class ManoPoker {
         return frec;
     }
 
+/**
+ * Comprueba si existe un grupo de cuatro cartas del mismo valor.
+ * @return true si se cumple la condición evaluada; false en caso contrario.
+ */
     private boolean esPoker() {
         return obtenerFrecuencias().containsValue(4);
     }
 
+/**
+ * Comprueba si la mano contiene un trío y una pareja.
+ * @return true si se cumple la condición evaluada; false en caso contrario.
+ */
     private boolean esFull() {
         Map<Integer, Integer> frec = obtenerFrecuencias();
         return frec.containsValue(3) && frec.containsValue(2);
     }
 
+/**
+ * Comprueba si la mano contiene un trío.
+ * @return true si se cumple la condición evaluada; false en caso contrario.
+ */
     private boolean esTrio() {
         Map<Integer, Integer> frec = obtenerFrecuencias();
         return frec.containsValue(3) && !frec.containsValue(2);
     }
 
+/**
+ * Comprueba si la mano contiene dos parejas diferentes.
+ * @return true si se cumple la condición evaluada; false en caso contrario.
+ */
     private boolean esDosPares() {
         long pares = obtenerFrecuencias().values().stream().filter(v -> v == 2).count();
         return pares == 2;
     }
 
+/**
+ * Comprueba si la mano contiene una pareja.
+ * @return true si se cumple la condición evaluada; false en caso contrario.
+ */
     private boolean esPar() {
         return obtenerFrecuencias().containsValue(2);
     }
 
     // --- Métodos para obtener valores de desempate (ordenados de mayor a menor importancia) ---
 
+/**
+ * Obtiene los valores altos de la mano en orden descendente para desempates.
+ * @return valor calculado o recuperado por el método.
+ */
     private List<Integer> obtenerValoresAltos() {
         List<Integer> valores = new ArrayList<>();
         for (Carta c : cartas) valores.add(c.getValor());
@@ -218,6 +265,10 @@ public class ManoPoker {
         return valores;
     }
 
+/**
+ * Obtiene los valores relevantes cuando la mano contiene una pareja.
+ * @return valor calculado o recuperado por el método.
+ */
     private List<Integer> obtenerValoresPar() {
         Map<Integer, Integer> frec = obtenerFrecuencias();
         int parValor = -1;
@@ -233,6 +284,10 @@ public class ManoPoker {
         return resultado;
     }
 
+/**
+ * Obtiene los valores de las dos parejas y del kicker para resolver desempates.
+ * @return valor calculado o recuperado por el método.
+ */
     private List<Integer> obtenerValoresDosPares() {
         Map<Integer, Integer> frec = obtenerFrecuencias();
         List<Integer> pares = new ArrayList<>();
@@ -247,6 +302,10 @@ public class ManoPoker {
         return resultado;
     }
 
+/**
+ * Obtiene los valores necesarios para desempatar una mano con trío.
+ * @return valor calculado o recuperado por el método.
+ */
     private List<Integer> obtenerValoresTrio() {
         Map<Integer, Integer> frec = obtenerFrecuencias();
         int trio = -1;
@@ -262,6 +321,10 @@ public class ManoPoker {
         return resultado;
     }
 
+/**
+ * Obtiene los valores del trío y la pareja de un full house.
+ * @return valor calculado o recuperado por el método.
+ */
     private List<Integer> obtenerValoresFull() {
         Map<Integer, Integer> frec = obtenerFrecuencias();
         int trio = -1, par = -1;
@@ -272,6 +335,10 @@ public class ManoPoker {
         return Arrays.asList(trio, par);
     }
 
+/**
+ * Obtiene los valores del poker y del kicker para desempatar.
+ * @return valor calculado o recuperado por el método.
+ */
     private List<Integer> obtenerValoresPoker() {
         Map<Integer, Integer> frec = obtenerFrecuencias();
         int poker = -1, kicker = -1;
@@ -284,11 +351,11 @@ public class ManoPoker {
 
     // --- Comparación completa ---
 
-    /**
-     * Compara esta mano con otra para desempate.
-     * @param otra la mano contraria
-     * @return 1 si esta es mayor, -1 si es menor, 0 si son iguales (en teoría)
-     */
+/**
+ * Compara esta mano con otra mano de póker utilizando la combinación y los criterios de desempate.
+ * @param otra valor utilizado por el método para realizar su operación.
+ * @return valor calculado o recuperado por el método.
+ */
     public int compararCon(ManoPoker otra) {
         if (this.tipo.getValor() != otra.tipo.getValor()) {
             return Integer.compare(this.tipo.getValor(), otra.tipo.getValor());
@@ -307,10 +374,18 @@ public class ManoPoker {
 
     // --- Getters ---
 
+/**
+ * Obtiene una copia de las cartas que conforman la mano.
+ * @return valor calculado o recuperado por el método.
+ */
     public List<Carta> getCartas() {
         return new ArrayList<>(cartas);
     }
 
+/**
+ * Devuelve una representación textual legible del objeto.
+ * @return valor calculado o recuperado por el método.
+ */
     @Override
     public String toString() {
         return cartas.toString() + " → " + tipo;
