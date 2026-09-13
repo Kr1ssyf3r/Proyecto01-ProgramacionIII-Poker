@@ -15,18 +15,32 @@ import java.util.Map;
  */
 public class CartaImagenes {
 
+/**
+ * Realiza la operación asociada al método HashMap<>.
+ * @return resultado de tipo new.
+ */
     private static final Map<Carta, Image> cache = new HashMap<>();
     private static Image reverso;
 
+/**
+ * Crea una nueva instancia de CartaImagenes con los datos recibidos.
+ */
     private CartaImagenes() {
     }
 
-    /** @return la imagen boca-arriba de la carta indicada (se carga una sola vez y se reutiliza). */
+/**
+ * Obtiene la imagen correspondiente a la carta indicada utilizando la caché de imágenes.
+ * @param carta valor utilizado por el método para realizar su operación.
+ * @return valor calculado o recuperado por el método.
+ */
     public static Image obtener(Carta carta) {
         return cache.computeIfAbsent(carta, c -> cargar(nombreArchivo(c)));
     }
 
-    /** @return la imagen del reverso (dorso), la misma para todas las cartas ocultas. */
+/**
+ * Obtiene la imagen del reverso de una carta.
+ * @return valor calculado o recuperado por el método.
+ */
     public static Image obtenerReverso() {
         if (reverso == null) {
             reverso = cargar("back.png");
@@ -34,6 +48,11 @@ public class CartaImagenes {
         return reverso;
     }
 
+/**
+ * Construye el nombre del archivo de imagen correspondiente a una carta.
+ * @param carta valor utilizado por el método para realizar su operación.
+ * @return valor calculado o recuperado por el método.
+ */
     private static String nombreArchivo(Carta carta) {
         String valor = switch (carta.getValor()) {
             case 11 -> "jack";
@@ -51,6 +70,11 @@ public class CartaImagenes {
         return valor + "_of_" + palo + ".png";
     }
 
+/**
+ * Carga desde los recursos la imagen indicada.
+ * @param nombreArchivo valor utilizado por el método para realizar su operación.
+ * @return valor calculado o recuperado por el método.
+ */
     private static Image cargar(String nombreArchivo) {
         String ruta = "/cartas/" + nombreArchivo;
         InputStream in = CartaImagenes.class.getResourceAsStream(ruta);
