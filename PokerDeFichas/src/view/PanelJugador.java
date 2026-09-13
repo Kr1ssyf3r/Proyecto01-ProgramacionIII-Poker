@@ -1,3 +1,4 @@
+
 package view;
 
 import model.Carta;
@@ -31,6 +32,10 @@ public class PanelJugador extends VBox {
     private final ImageView imgCarta1;
     private final ImageView imgCarta2;
 
+/**
+ * Crea una nueva instancia de PanelJugador con los datos recibidos.
+ * @param jugador valor utilizado por el método para realizar su operación.
+ */
     public PanelJugador(Jugador jugador) {
         setSpacing(4);
         setPadding(new Insets(8));
@@ -55,6 +60,10 @@ public class PanelJugador extends VBox {
         getChildren().addAll(lblNombre, lblSaldo, filaCartas);
     }
 
+/**
+ * Crea y configura un ImageView reutilizable para una carta.
+ * @return valor calculado o recuperado por el método.
+ */
     private ImageView crearImageView() {
         ImageView iv = new ImageView();
         iv.setFitWidth(ANCHO_CARTA);
@@ -62,7 +71,10 @@ public class PanelJugador extends VBox {
         return iv;
     }
 
-    /** Sincroniza el panel con el estado actual del Jugador (llamar después de cada acción). */
+/**
+ * Sincroniza el panel visual con los datos actuales del jugador recibido.
+ * @param jugador valor utilizado por el método para realizar su operación.
+ */
     public void actualizarDesde(Jugador jugador) {
         lblSaldo.setText("Fichas: " + jugador.getSaldoFichas());
         if (!jugador.isActivo()) {
@@ -72,21 +84,27 @@ public class PanelJugador extends VBox {
         }
     }
 
-    /**
-     * Muestra las cartas reales boca arriba. Se usa siempre para el jugador humano,
-     * y para los bots solo al final de la ronda (showdown), para "revelar" su mano.
-     */
+/**
+ * Muestra las cartas recibidas utilizando las imágenes disponibles.
+ * @param cartas valor utilizado por el método para realizar su operación.
+ */
     public void mostrarCartas(List<Carta> cartas) {
         if (cartas.size() > 0) imgCarta1.setImage(CartaImagenes.obtener(cartas.get(0)));
         if (cartas.size() > 1) imgCarta2.setImage(CartaImagenes.obtener(cartas.get(1)));
     }
 
-    /** Vuelve a tapar ambas cartas con el reverso (para ocultar la mano de un bot). */
+/**
+ * Oculta las cartas visualizadas y muestra su reverso cuando corresponde.
+ */
     public void ocultarCartas() {
         imgCarta1.setImage(CartaImagenes.obtenerReverso());
         imgCarta2.setImage(CartaImagenes.obtenerReverso());
     }
 
+/**
+ * Obtiene el nombre del jugador.
+ * @return valor calculado o recuperado por el método.
+ */
     public String getNombre() {
         return lblNombre.getText();
     }
