@@ -1,20 +1,24 @@
 package view;
 
+import model.Carta;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.Label;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.FlowPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 
+import java.util.List;
+
 /**
- * Panel central de la mesa: muestra las cartas comunitarias y el pozo (bote) actual.
- *
- * NOTA TEMPORAL: los valores empiezan en 0 / sin cartas. Cuando JuegoPoker
- * (Persona 2) esté listo, este panel se actualizará vía actualizarPozo()
- * y actualizarCartasComunitarias() en cada cambio de ronda.
+ * Panel central de la mesa: muestra las cartas comunitarias (con imágenes reales,
+ * 0 a 5 según la fase) y el pozo (bote) actual.
  */
 public class PanelMesa extends VBox {
+
+    private static final double ANCHO_CARTA = 60;
+    private static final double ALTO_CARTA = 85;
 
     private final Label lblPozo;
     private final FlowPane cartasComunitarias;
@@ -32,10 +36,6 @@ public class PanelMesa extends VBox {
         cartasComunitarias = new FlowPane();
         cartasComunitarias.setHgap(8);
         cartasComunitarias.setAlignment(Pos.CENTER);
-        cartasComunitarias.getChildren().addAll(
-                new Label("[ ]"), new Label("[ ]"), new Label("[ ]"),
-                new Label("[ ]"), new Label("[ ]")
-        );
 
         lblPozo = new Label("Pozo: 0");
         lblPozo.setTextFill(Color.GOLD);
@@ -49,14 +49,14 @@ public class PanelMesa extends VBox {
         lblPozo.setText("Pozo: " + nuevoPozo);
     }
 
-    /**
-     * Actualiza las cartas comunitarias visibles.
-     * @param cartasTexto lista de textos de carta (ej. "A♠", "10♦"); se muestran en orden.
-     */
-    public void actualizarCartasComunitarias(String... cartasTexto) {
+    /** Muestra las cartas comunitarias reveladas hasta ahora (lista vacía en PREFLOP). */
+    public void actualizarCartasComunitarias(List<Carta> cartas) {
         cartasComunitarias.getChildren().clear();
-        for (String carta : cartasTexto) {
-            cartasComunitarias.getChildren().add(new Label("[ " + carta + " ]"));
+        for (Carta carta : cartas) {
+            ImageView iv = new ImageView(CartaImagenes.obtener(carta));
+            iv.setFitWidth(ANCHO_CARTA);
+            iv.setFitHeight(ALTO_CARTA);
+            cartasComunitarias.getChildren().add(iv);
         }
     }
 }

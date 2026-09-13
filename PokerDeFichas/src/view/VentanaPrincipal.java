@@ -5,6 +5,7 @@ import juego.BotConservador;
 import juego.JuegoPoker;
 import model.*;
 import javafx.application.Application;
+import javafx.application.Platform;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -19,7 +20,6 @@ import javafx.stage.Stage;
 import javafx.animation.PauseTransition;
 import javafx.animation.SequentialTransition;
 import javafx.util.Duration;
-import javafx.application.Platform;
 import java.util.*;
 
 /**
@@ -43,7 +43,7 @@ public class VentanaPrincipal extends Application {
     private Label lblTurno;
     private Label lblNarracion;
     private int ultimoIndiceHistorial = 0;
-    private static final Duration PAUSA_ENTRE_JUGADAS = Duration.seconds(2.0);
+    private static final Duration PAUSA_ENTRE_JUGADAS = Duration.seconds(1.5);
 
     @Override
     public void start(Stage stage) {
@@ -99,6 +99,8 @@ public class VentanaPrincipal extends Application {
 
     private void iniciarNuevaRonda() {
         ultimoIndiceHistorial = 0;
+        panelBot1.ocultarCartas();
+        panelBot2.ocultarCartas();
         juego.iniciarRonda();
         narrarNuevasJugadas(this::refrescarUI);
     }
@@ -144,14 +146,16 @@ public class VentanaPrincipal extends Application {
             pausa.setOnFinished(e -> lblNarracion.setText(describirJugada(registro)));
             secuencia.getChildren().add(pausa);
         }
-
         // Pausa extra SOLO para que el último mensaje también se alcance a leer;
         // si no, se muestra y se limpia en el mismo instante (bug: nunca se ve
         // la jugada del último bot en actuar).
         secuencia.getChildren().add(new PauseTransition(PAUSA_ENTRE_JUGADAS));
-        secuencia.setOnFinished(e -> {
 
+        secuencia.setOnFinished(e -> {
             lblNarracion.setText(" ");
+            // Platform.runLater espera a que termine este ciclo de animación antes
+            // de ejecutar alTerminar; si no, showAndWait() (dentro de mostrarFinDeRonda)
+            // lanza IllegalStateException por llamarse "durante" la animación.
             if (alTerminar != null) {
                 Platform.runLater(alTerminar);
             }
@@ -159,16 +163,16 @@ public class VentanaPrincipal extends Application {
         secuencia.play();
     }
 
-        /** Arma el texto explicativo de una jugada de bot, para que se entienda qué y por qué. */
-        private String describirJugada(RegistroAccion registro) {
-            String nombre = registro.jugador().getNombre();
-            return switch (registro.accion()) {
-                case CHECK -> nombre + " pasa (check): no hay apuesta que igualar.";
-                case CALL -> nombre + " iguala (call) con " + registro.monto() + " fichas.";
-                case RAISE -> nombre + " sube (raise) la apuesta a " + registro.monto() + " fichas.";
-                case FOLD -> nombre + " se retira (fold): la apuesta le pareció demasiado alta.";
-            };
-        }
+    /** Arma el texto explicativo de una jugada de bot, para que se entienda qué y por qué. */
+    private String describirJugada(RegistroAccion registro) {
+        String nombre = registro.jugador().getNombre();
+        return switch (registro.accion()) {
+            case CHECK -> nombre + " pasa (check): no hay apuesta que igualar.";
+            case CALL -> nombre + " iguala (call) con " + registro.monto() + " fichas.";
+            case RAISE -> nombre + " sube (raise) la apuesta a " + registro.monto() + " fichas.";
+            case FOLD -> nombre + " se retira (fold): la apuesta le pareció demasiado alta.";
+        };
+    }
 
     private Map<Jugador, Integer> capturarSaldos() {
         Map<Jugador, Integer> saldos = new HashMap<>();
@@ -185,17 +189,14 @@ public class VentanaPrincipal extends Application {
         panelBot2.actualizarDesde(bot2);
         panelMesa.actualizarPozo(juego.getBote());
 
-        // Solo se muestran las cartas del jugador humano; las de los bots quedan ocultas.
+        // Solo se muestran las cartas del jugador humano; las de los bots quedan ocultas
+        // hasta el final de la ronda (ver revelarCartasBots()).
         List<Carta> misCartas = juego.getCartasPrivadas(jugadorHumano);
         if (!misCartas.isEmpty()) {
-            String textoCartas = misCartas.stream().map(Carta::toString)
-                    .reduce((a, b) -> a + "  " + b).orElse("");
-            panelHumano.actualizarCartas(textoCartas);
+            panelHumano.mostrarCartas(misCartas);
         }
 
-        List<Carta> comunitarias = juego.getCartasComunitarias();
-        String[] textos = comunitarias.stream().map(Carta::toString).toArray(String[]::new);
-        panelMesa.actualizarCartasComunitarias(textos);
+        panelMesa.actualizarCartasComunitarias(juego.getCartasComunitarias());
 
         controles.setApuestaActual(juego.getApuestaActual());
         controles.setSaldoDisponible(jugadorHumano.getSaldoFichas());
@@ -219,6 +220,8 @@ public class VentanaPrincipal extends Application {
             return;
         }
 
+        revelarCartasBots();
+
         if ("SHOWDOWN".equals(juego.getFaseActual())) {
             ResultadoRonda resultado = juego.resolverRonda();
             if (resultado != null) {
@@ -240,6 +243,12 @@ public class VentanaPrincipal extends Application {
             mostrarFinDeRonda(nombreGanador, fichasGanadas, null);
         }
         refrescarUI();
+    }
+
+    /** Muestra boca arriba las cartas de ambos bots (se llama al terminar la ronda). */
+    private void revelarCartasBots() {
+        panelBot1.mostrarCartas(juego.getCartasPrivadas(bot1));
+        panelBot2.mostrarCartas(juego.getCartasPrivadas(bot2));
     }
 
     /**
