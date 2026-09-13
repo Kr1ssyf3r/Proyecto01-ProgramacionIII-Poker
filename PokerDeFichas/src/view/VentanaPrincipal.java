@@ -43,8 +43,13 @@ public class VentanaPrincipal extends Application {
     private Label lblTurno;
     private Label lblNarracion;
     private int ultimoIndiceHistorial = 0;
+    /** Pausa utilizada para narrar las jugadas de los bots de forma visible. */
     private static final Duration PAUSA_ENTRE_JUGADAS = Duration.seconds(1.5);
 
+/**
+ * Configura los componentes de la interfaz y muestra la ventana principal de la aplicación.
+ * @param stage valor utilizado por el método para realizar su operación.
+ */
     @Override
     public void start(Stage stage) {
         jugadorHumano = new JugadorHumano("Jugador", 500);
@@ -97,6 +102,9 @@ public class VentanaPrincipal extends Application {
         iniciarNuevaRonda();
     }
 
+/**
+ * Crea una nueva ronda y actualiza la interfaz con el estado inicial.
+ */
     private void iniciarNuevaRonda() {
         ultimoIndiceHistorial = 0;
         panelBot1.ocultarCartas();
@@ -105,6 +113,11 @@ public class VentanaPrincipal extends Application {
         narrarNuevasJugadas(this::refrescarUI);
     }
 
+/**
+ * Recibe la acción seleccionada por el usuario y la envía a la lógica de la partida.
+ * @param accion valor utilizado por el método para realizar su operación.
+ * @param monto valor utilizado por el método para realizar su operación.
+ */
     private void onAccionHumana(AccionPoker accion, int monto) {
         Map<Jugador, Integer> saldosAntes = capturarSaldos();
         try {
@@ -119,12 +132,10 @@ public class VentanaPrincipal extends Application {
         });
     }
 
-    /**
-     * Muestra, una por una y con pausa entre cada una, las jugadas de los BOTS que
-     * ocurrieron desde la última vez que se revisó el historial (la del jugador humano
-     * no se narra porque ya se ve reflejada en sus propios botones). Al terminar,
-     * ejecuta alTerminar (normalmente refrescarUI + revisar fin de ronda).
-     */
+/**
+ * Recorre las acciones recientes y las muestra progresivamente en la interfaz.
+ * @param alTerminar valor utilizado por el método para realizar su operación.
+ */
     private void narrarNuevasJugadas(Runnable alTerminar) {
         List<RegistroAccion> historialCompleto = juego.getHistorial();
         List<RegistroAccion> nuevas = historialCompleto.subList(ultimoIndiceHistorial, historialCompleto.size());
@@ -163,7 +174,11 @@ public class VentanaPrincipal extends Application {
         secuencia.play();
     }
 
-    /** Arma el texto explicativo de una jugada de bot, para que se entienda qué y por qué. */
+/**
+ * Convierte un registro de acción en un texto legible para la interfaz.
+ * @param registro valor utilizado por el método para realizar su operación.
+ * @return valor calculado o recuperado por el método.
+ */
     private String describirJugada(RegistroAccion registro) {
         String nombre = registro.jugador().getNombre();
         return switch (registro.accion()) {
@@ -174,6 +189,10 @@ public class VentanaPrincipal extends Application {
         };
     }
 
+/**
+ * Captura los saldos de los jugadores antes de finalizar la ronda.
+ * @return resultado de tipo Integer>.
+ */
     private Map<Jugador, Integer> capturarSaldos() {
         Map<Jugador, Integer> saldos = new HashMap<>();
         for (Jugador j : juego.getJugadores()) {
@@ -182,7 +201,9 @@ public class VentanaPrincipal extends Application {
         return saldos;
     }
 
-    /** Sincroniza todos los paneles (incluida la etiqueta de turno) con el estado actual de JuegoPoker. */
+/**
+ * Actualiza los distintos paneles de la interfaz con el estado actual de la partida.
+ */
     private void refrescarUI() {
         panelHumano.actualizarDesde(jugadorHumano);
         panelBot1.actualizarDesde(bot1);
@@ -208,13 +229,10 @@ public class VentanaPrincipal extends Application {
         controles.setDisable(!esTurnoHumano);
     }
 
-    /**
-     * Revisa si la ronda terminó y muestra el resultado.
-     * Hay dos caminos porque JuegoPoker maneja ambos casos de forma distinta:
-     *  - SHOWDOWN: hay que llamar resolverRonda() para evaluar manos (sí sabemos la combinación ganadora).
-     *  - Retiro de los demás: el bote ya se asignó dentro de JuegoPoker; se detecta comparando
-     *    el saldo de cada jugador antes/después de la acción (no hay combinación que mostrar).
-     */
+/**
+ * Comprueba si la ronda terminó y presenta el resultado al usuario cuando corresponde.
+ * @param saldosAntes valor utilizado por el método para realizar su operación.
+ */
     private void revisarFinDeRonda(Map<Jugador, Integer> saldosAntes) {
         if (!juego.isRondaTerminada()) {
             return;
@@ -245,18 +263,20 @@ public class VentanaPrincipal extends Application {
         refrescarUI();
     }
 
-    /** Muestra boca arriba las cartas de ambos bots (se llama al terminar la ronda). */
+/**
+ * Muestra las cartas de los jugadores bot cuando finaliza la ronda.
+ */
     private void revelarCartasBots() {
         panelBot1.mostrarCartas(juego.getCartasPrivadas(bot1));
         panelBot2.mostrarCartas(juego.getCartasPrivadas(bot2));
     }
 
-    /**
-     * Arma y muestra el mensaje de fin de ronda: quién ganó, cuántas fichas, y el ranking
-     * completo de combinaciones de póker de mayor a menor poder, señalando cuál fue la ganadora.
-     * Si combinacionGanadora es null (se ganó por retiro de los demás), se muestra el ranking
-     * completo igual mas sin marcar ninguna, porque no hubo comparación de manos.
-     */
+/**
+ * Muestra un resumen visual del ganador, las fichas ganadas y la combinación obtenida.
+ * @param nombreGanador valor utilizado por el método para realizar su operación.
+ * @param fichasGanadas valor utilizado por el método para realizar su operación.
+ * @param combinacionGanadora valor utilizado por el método para realizar su operación.
+ */
     private void mostrarFinDeRonda(String nombreGanador, int fichasGanadas, CombinacionPoker combinacionGanadora) {
         StringBuilder mensaje = new StringBuilder();
         if (combinacionGanadora != null) {
@@ -285,7 +305,11 @@ public class VentanaPrincipal extends Application {
         alerta.showAndWait();
     }
 
-    /** Nombre en español y con acentos para mostrar cada combinación en la GUI. */
+/**
+ * Convierte el nombre interno de una combinación de póker en un texto amigable para el usuario.
+ * @param combinacion valor utilizado por el método para realizar su operación.
+ * @return valor calculado o recuperado por el método.
+ */
     private String nombreLegible(CombinacionPoker combinacion) {
         return switch (combinacion) {
             case CARTA_ALTA -> "Carta Alta";
@@ -301,6 +325,10 @@ public class VentanaPrincipal extends Application {
         };
     }
 
+/**
+ * Muestra un mensaje de error al usuario mediante un diálogo de JavaFX.
+ * @param mensaje valor utilizado por el método para realizar su operación.
+ */
     private void mostrarError(String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.ERROR, mensaje);
         alerta.setHeaderText("Acción no válida");
