@@ -29,11 +29,10 @@ public class JuegoPoker implements Jugable {
         PREFLOP, FLOP, TURN, RIVER, SHOWDOWN
     }
 
-    /**
-     * Constructor. Inicializa la partida con la lista de jugadores.
-     * @param jugadores lista de jugadores (mínimo 2)
-     * @throws IllegalArgumentException si hay menos de 2 jugadores
-     */
+/**
+ * Crea una nueva instancia de JuegoPoker con los datos recibidos.
+ * @param jugadores valor utilizado por el método para realizar su operación.
+ */
     public JuegoPoker(List<Jugador> jugadores) {
         if (jugadores.size() < 2) {
             throw new IllegalArgumentException("Se necesitan al menos 2 jugadores");
@@ -55,6 +54,9 @@ public class JuegoPoker implements Jugable {
 
     // --- Métodos públicos de la interfaz Jugable ---
 
+/**
+ * Reinicia el estado de la partida y reparte las cartas privadas iniciales a todos los jugadores.
+ */
     @Override
     public void iniciarRonda() {
         // Reiniciar estado de todos los jugadores
@@ -84,6 +86,12 @@ public class JuegoPoker implements Jugable {
         siguienteTurno(); // Avanzar hasta que sea turno de un humano o termine la ronda
     }
 
+/**
+ * Valida y procesa la acción seleccionada por el jugador, actualizando el estado de la ronda.
+ * @param jugador valor utilizado por el método para realizar su operación.
+ * @param accion valor utilizado por el método para realizar su operación.
+ * @param cantidadApuesta valor utilizado por el método para realizar su operación.
+ */
     @Override
     public void procesarAccion(Jugador jugador, AccionPoker accion, int cantidadApuesta) {
         // Validar que sea el turno del jugador
@@ -157,6 +165,9 @@ public class JuegoPoker implements Jugable {
         siguienteTurno();
     }
 
+/**
+ * Avanza al siguiente jugador que puede actuar y ejecuta automáticamente la estrategia de los bots cuando corresponde.
+ */
     @Override
     public void siguienteTurno() {
         // Si la ronda ya terminó, no hacer nada
@@ -239,12 +250,10 @@ public class JuegoPoker implements Jugable {
         // No hacemos nada más.
     }
 
-    /**
-     * Verifica si la ronda de apuestas actual ha terminado.
-     * Condiciones:
-     * 1. Todos los jugadores activos han actuado (están en yaActuaron).
-     * 2. Todos los activos tienen su apuesta igual a apuestaActual (o apuestaActual == 0).
-     */
+/**
+ * Comprueba si todos los jugadores activos han completado sus acciones y han igualado la apuesta vigente.
+ * @return true si se cumple la condición evaluada; false en caso contrario.
+ */
     private boolean rondaApuestasTerminada() {
         List<Jugador> activos = jugadores.stream()
                 .filter(Jugador::isActivo)
@@ -273,6 +282,10 @@ public class JuegoPoker implements Jugable {
         }
     }
 
+/**
+ * Obtiene el jugador que tiene el turno actual.
+ * @return valor calculado o recuperado por el método.
+ */
     @Override
     public Jugador getJugadorActual() {
         if (rondaTerminada) return null;
@@ -284,26 +297,46 @@ public class JuegoPoker implements Jugable {
         return j;
     }
 
+/**
+ * Obtiene una copia de las cartas comunitarias actuales.
+ * @return valor calculado o recuperado por el método.
+ */
     @Override
     public List<Carta> getCartasComunitarias() {
         return new ArrayList<>(cartasComunitarias);
     }
 
+/**
+ * Obtiene el monto acumulado en el bote.
+ * @return valor calculado o recuperado por el método.
+ */
     @Override
     public int getBote() {
         return bote;
     }
 
+/**
+ * Obtiene el monto de la apuesta más alta vigente.
+ * @return valor calculado o recuperado por el método.
+ */
     @Override
     public int getApuestaActual() {
         return apuestaActual;
     }
 
+/**
+ * Indica si la fase actual de la ronda de apuestas ya terminó.
+ * @return true si se cumple la condición evaluada; false en caso contrario.
+ */
     @Override
     public boolean isRondaTerminada() {
         return rondaTerminada;
     }
 
+/**
+ * Determina el ganador de la ronda, calcula la mejor mano y devuelve el resultado correspondiente.
+ * @return valor calculado o recuperado por el método.
+ */
     @Override
     public ResultadoRonda resolverRonda() {
         // Si la ronda no ha terminado, forzar término
@@ -350,37 +383,48 @@ public class JuegoPoker implements Jugable {
         return null;
     }
 
+/**
+ * Obtiene una copia de la lista de jugadores de la partida.
+ * @return valor calculado o recuperado por el método.
+ */
     @Override
     public List<Jugador> getJugadores() {
         return new ArrayList<>(jugadores);
     }
 
+/**
+ * Obtiene el nombre de la fase actual de la partida.
+ * @return valor calculado o recuperado por el método.
+ */
     @Override
     public String getFaseActual() {
         return fase.name();
     }
 
+/**
+ * Obtiene una copia de las cartas privadas del jugador indicado.
+ * @param jugador valor utilizado por el método para realizar su operación.
+ * @return valor calculado o recuperado por el método.
+ */
     @Override
     public List<Carta> getCartasPrivadas(Jugador jugador) {
         List<Carta> privadas = cartasPrivadas.get(jugador);
         return privadas != null ? new ArrayList<>(privadas) : new ArrayList<>();
     }
 
-    /**
-     * @return copia del historial de acciones procesadas en la ronda actual, en orden.
-     *         Se reinicia en cada iniciarRonda(). Pensado para que la GUI narre
-     *         con calma lo que hicieron los bots en vez de solo ver el resultado final.
-     */
+/**
+ * Obtiene una copia del historial de acciones realizadas en la ronda.
+ * @return valor calculado o recuperado por el método.
+ */
     public List<RegistroAccion> getHistorial() {
         return new ArrayList<>(historial);
     }
 
     // --- Métodos auxiliares privados ---
 
-    /**
-     * Avanza a la siguiente fase del juego (flop, turn, river, showdown).
-     * Se llama automáticamente cuando termina una ronda de apuestas.
-     */
+/**
+ * Avanza la partida a la siguiente fase de apuestas y reparte las cartas comunitarias que correspondan.
+ */
     private void avanzarFase() {
         if (fase == Fase.PREFLOP) {
             fase = Fase.FLOP;
@@ -417,19 +461,18 @@ public class JuegoPoker implements Jugable {
         }
     }
 
-    /**
-     * Reparte cartas comunitarias (flop, turn, river).
-     * @param cantidad número de cartas a repartir (3 para flop, 1 para turn/river)
-     */
+/**
+ * Reparte y agrega a la mesa la cantidad indicada de cartas comunitarias.
+ * @param cantidad valor utilizado por el método para realizar su operación.
+ */
     private void repartirComunitarias(int cantidad) {
         List<Carta> nuevas = mazo.repartir(cantidad);
         cartasComunitarias.addAll(nuevas);
     }
 
-    /**
-     * Reinicia las apuestas de la ronda para la siguiente fase.
-     * Mantiene el bote acumulado, pero resetea la apuesta actual y las apuestas de cada jugador.
-     */
+/**
+ * Reinicia los registros de apuestas y de jugadores que ya actuaron para comenzar una nueva fase.
+ */
     private void reiniciarApuestas() {
         apuestaActual = 0;
         apuestasJugador.clear();
@@ -438,11 +481,11 @@ public class JuegoPoker implements Jugable {
         // Los retirados permanecen en el set
     }
 
-    /**
-     * Obtiene la mejor mano de 5 cartas para un jugador combinando sus privadas y las comunitarias.
-     * @param jugador el jugador
-     * @return ManoPoker con la mejor combinación
-     */
+/**
+ * Construye y evalúa la mejor mano disponible para el jugador a partir de sus cartas privadas y las comunitarias.
+ * @param jugador valor utilizado por el método para realizar su operación.
+ * @return valor calculado o recuperado por el método.
+ */
     private ManoPoker getMejorManoJugador(Jugador jugador) {
         List<Carta> todas = new ArrayList<>(cartasPrivadas.get(jugador));
         todas.addAll(cartasComunitarias);
