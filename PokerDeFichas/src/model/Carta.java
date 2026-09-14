@@ -1,0 +1,87 @@
+package model;
+/*
+    Representa la carta individual, de la baraja de 52 cartas
+    Se mantiene el valor de 2 a 14, 11=jota, 12=reina, 13=Rey, 14=As
+ */
+/**
+ * Representa una carta de la baraja mediante su palo y valor.
+ */
+public class Carta {
+    private final Palo palo;
+    private final int valor;
+
+    //Crea una nueva carta con el palo y valor, recibe por parámetro
+/**
+ * Crea una nueva instancia de Carta con los datos recibidos.
+ * @param palo valor utilizado por el método para realizar su operación.
+ * @param valor valor utilizado por el método para realizar su operación.
+ */
+    public Carta (Palo palo, int valor) {
+        if (valor < 2 || valor > 14) {
+            throw new IllegalArgumentException("El valor debe estar entre 2 y 14 (recibido: " + valor + ")");
+        }
+        this.palo = palo;
+        this.valor = valor;
+    }
+    //getters del palo y del valor de la carta
+/**
+ * Obtiene el palo de la carta.
+ * @return resultado de tipo Palo.
+ */
+    public Palo getPalo() {return palo; }
+
+/**
+ * Obtiene el valor numérico de la carta.
+ *
+ * @return valor de la carta.
+ */
+    public int getValor() {return valor; }
+
+    //convertidor del valor numérico a su representación en carta
+/**
+ * Obtiene la representación textual del valor de la carta.
+ * @return valor calculado o recuperado por el método.
+ */
+    public String getNombreValor(){
+        return switch (valor) {
+            case 11 -> "J";
+            case 12 -> "Q";
+            case 13 -> "K";
+            case 14 -> "A";
+            default -> String.valueOf(valor);
+        };
+    }
+
+    //toString() muestra en pantalla la carta con letra y palo correspondiente
+/**
+ * Devuelve una representación textual legible del objeto.
+ * @return valor calculado o recuperado por el método.
+ */
+    @Override
+    public String toString() {
+        return getNombreValor() + palo.getSimbolo();
+    }
+
+    //Determina si dos cartas son iguales (mismo palo o mismo valor). Retorna true si son iguales y false en caso contrario
+/**
+ * Compara el objeto actual con otro para determinar si representan la misma entidad.
+ * @param obj valor utilizado por el método para realizar su operación.
+ * @return true si se cumple la condición evaluada; false en caso contrario.
+ */
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (!(obj instanceof Carta otraCarta)) return false;
+        return this.valor == otraCarta.valor && this.palo == otraCarta.palo;
+    }
+
+    //en continuación al equals(), se requiere para manejar las cartas y utilizar las colecciones de HashMap o HashSet
+/**
+ * Calcula el código hash del objeto a partir de sus atributos relevantes.
+ * @return valor calculado o recuperado por el método.
+ */
+    @Override
+    public int hashCode(){
+        return palo.hashCode() * 31 + valor;
+    }
+}
