@@ -14,10 +14,10 @@ import model.AccionPoker;
 public class BotConservador implements EstrategiaApuesta {
 
 /**
- * Determina la acción que debe realizar el jugador o bot según la apuesta y el bote actuales.
- * @param apuestaActual valor utilizado por el método para realizar su operación.
- * @param boteActual valor utilizado por el método para realizar su operación.
- * @return valor calculado o recuperado por el método.
+ * Decide la acción del bot conservador: pasa si no hay apuesta, iguala apuestas de 20 o menos y se retira ante apuestas mayores.
+ * @param apuestaActual apuesta más alta vigente en la ronda actual.
+ * @param boteActual monto acumulado en el bote.
+ * @return CHECK sin apuesta, CALL si la apuesta es de 20 o menos, FOLD si es mayor.
  */
     @Override
     public AccionPoker decidirAccion(int apuestaActual, int boteActual) {

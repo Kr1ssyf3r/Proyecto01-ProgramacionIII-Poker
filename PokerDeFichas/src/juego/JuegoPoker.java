@@ -31,7 +31,7 @@ public class JuegoPoker implements Jugable {
 
 /**
  * Crea una nueva instancia de JuegoPoker con los datos recibidos.
- * @param jugadores valor utilizado por el método para realizar su operación.
+ * @param jugadores jugadores que participan en la partida (mínimo 2).
  */
     public JuegoPoker(List<Jugador> jugadores) {
         if (jugadores.size() < 2) {
@@ -56,6 +56,7 @@ public class JuegoPoker implements Jugable {
 
 /**
  * Reinicia el estado de la partida y reparte las cartas privadas iniciales a todos los jugadores.
+ * Los jugadores que ya no tienen fichas quedan fuera de la ronda.
  */
     @Override
     public void iniciarRonda() {
@@ -81,6 +82,14 @@ public class JuegoPoker implements Jugable {
             cartasPrivadas.put(j, privadas);
         }
 
+        // Los jugadores que ya no tienen fichas quedan fuera de esta ronda
+        for (Jugador j : jugadores) {
+            if (!j.tieneFichas()) {
+                j.fold();
+                jugadoresRetirados.add(j);
+            }
+        }
+
         // El turno empieza por el primer jugador (índice 0)
         turnoActual = 0;
         siguienteTurno(); // Avanzar hasta que sea turno de un humano o termine la ronda
@@ -88,9 +97,11 @@ public class JuegoPoker implements Jugable {
 
 /**
  * Valida y procesa la acción seleccionada por el jugador, actualizando el estado de la ronda.
- * @param jugador valor utilizado por el método para realizar su operación.
- * @param accion valor utilizado por el método para realizar su operación.
- * @param cantidadApuesta valor utilizado por el método para realizar su operación.
+ * Un RAISE no puede superar lo que puede igualar el jugador con menos fichas; quien se queda
+ * sin fichas (all-in) sigue en la mano hasta el showdown.
+ * @param jugador jugador que ejecuta la acción; debe ser el del turno actual.
+ * @param accion acción elegida: CHECK, CALL, FOLD o RAISE.
+ * @param cantidadApuesta monto total de la apuesta si la acción es RAISE; se ignora en las demás acciones.
  */
     @Override
     public void procesarAccion(Jugador jugador, AccionPoker accion, int cantidadApuesta) {
@@ -136,6 +147,11 @@ public class JuegoPoker implements Jugable {
                 if (totalApuesta > jugador.getSaldoFichas()) {
                     throw new IllegalStateException("Saldo insuficiente para RAISE");
                 }
+                int tope = apuestaMaximaPermitida();
+                if (subida > tope) {
+                    throw new IllegalArgumentException("La subida máxima es " + tope
+                            + " fichas: es lo que puede igualar el jugador con menos fichas");
+                }
                 jugador.apostar(totalApuesta);
                 montoRegistro = subida; //Registro
                 bote += totalApuesta;
@@ -151,10 +167,8 @@ public class JuegoPoker implements Jugable {
         }
         historial.add(new RegistroAccion(jugador, accion, montoRegistro)); //Aquí es donde realmente se guarda el registro de la jugada que se acaba de procesar (sea de un humano o un bot).
 
-        // Si el jugador se retiró o se quedó sin fichas, lo marcamos
-        if (!jugador.tieneFichas()) {
-            jugadoresRetirados.add(jugador);
-        }
+        // Un jugador que se queda sin fichas (all-in) sigue en la mano hasta el showdown;
+        // simplemente ya no puede actuar más (ver siguienteTurno y rondaApuestasTerminada).
 
         // Si no fue RAISE, añadir el jugador a los que ya actuaron
         if (accion != AccionPoker.RAISE) {
@@ -215,7 +229,8 @@ public class JuegoPoker implements Jugable {
                 return;
             }
             Jugador candidato = jugadores.get(turnoActual);
-            if (candidato.isActivo() && !jugadoresRetirados.contains(candidato)) {
+            if (candidato.isActivo() && !jugadoresRetirados.contains(candidato)
+                    && candidato.tieneFichas()) {
                 // Si aún no ha actuado en esta ronda, es el siguiente
                 if (!yaActuaron.contains(candidato)) {
                     siguiente = candidato;
@@ -236,10 +251,15 @@ public class JuegoPoker implements Jugable {
             AccionPoker accion = siguiente.decidirAccion(apuestaActual, bote);
             int cantidad = 0;
             if (accion == AccionPoker.RAISE) {
-                // Subida simple: doblar la apuesta actual (o mínimo)
-                cantidad = apuestaActual * 2;
-                if (cantidad > siguiente.getSaldoFichas()) cantidad = siguiente.getSaldoFichas();
-                if (cantidad <= apuestaActual) cantidad = apuestaActual + 10; // fallback
+                // Subida simple: doblar la apuesta actual (mínimo, subir 10), sin pasar del tope permitido
+                cantidad = Math.max(apuestaActual * 2, apuestaActual + 10);
+                cantidad = Math.min(cantidad, apuestaMaximaPermitida());
+                if (cantidad <= apuestaActual) {
+                    // No puede subir (nadie podría igualarlo): iguala si hay apuesta, si no pasa
+                    boolean hayQueIgualar = apuestasJugador.getOrDefault(siguiente, 0) < apuestaActual;
+                    accion = hayQueIgualar ? AccionPoker.CALL : AccionPoker.CHECK;
+                    cantidad = 0;
+                }
             }
             // Procesar la acción del bot (esto llamará a siguienteTurno nuevamente)
             procesarAccion(siguiente, accion, cantidad);
@@ -252,7 +272,8 @@ public class JuegoPoker implements Jugable {
 
 /**
  * Comprueba si todos los jugadores activos han completado sus acciones y han igualado la apuesta vigente.
- * @return true si se cumple la condición evaluada; false en caso contrario.
+ * Los jugadores sin fichas (all-in) ya no pueden actuar, así que no se les exige actuar ni igualar.
+ * @return true si todos los jugadores que pueden actuar ya actuaron y igualaron la apuesta.
  */
     private boolean rondaApuestasTerminada() {
         List<Jugador> activos = jugadores.stream()
@@ -262,17 +283,25 @@ public class JuegoPoker implements Jugable {
 
         if (activos.isEmpty()) return true;
 
-        // Verificar que todos los activos hayan actuado
-        boolean todosActuaron = yaActuaron.containsAll(activos);
+        // Los jugadores sin fichas (all-in) ya no pueden actuar: solo cuentan los que aún tienen fichas
+        List<Jugador> conFichas = activos.stream().filter(Jugador::tieneFichas).toList();
+        if (conFichas.isEmpty()) return true;
+        if (conFichas.size() == 1 && activos.size() > 1) {
+            // Los demás están all-in: solo falta que este jugador iguale la apuesta (si la hay)
+            return apuestasJugador.getOrDefault(conFichas.get(0), 0) >= apuestaActual;
+        }
+
+        // Verificar que todos los que pueden actuar hayan actuado
+        boolean todosActuaron = yaActuaron.containsAll(conFichas);
         if (!todosActuaron) return false;
 
-        // Verificar que todos los activos tengan la apuesta igual a la actual
+        // Verificar que todos los que pueden actuar tengan la apuesta igual a la actual
         if (apuestaActual == 0) {
             // Si no hay apuesta, con que todos hayan actuado (hicieron CHECK) basta
             return true;
         } else {
             // Todos deben haber igualado la apuestaActual
-            for (Jugador j : activos) {
+            for (Jugador j : conFichas) {
                 int apostado = apuestasJugador.getOrDefault(j, 0);
                 if (apostado != apuestaActual) {
                     return false;
@@ -284,14 +313,14 @@ public class JuegoPoker implements Jugable {
 
 /**
  * Obtiene el jugador que tiene el turno actual.
- * @return valor calculado o recuperado por el método.
+ * @return jugador que debe actuar, o null si la ronda terminó o no hay un turno vigente.
  */
     @Override
     public Jugador getJugadorActual() {
         if (rondaTerminada) return null;
         if (turnoActual < 0 || turnoActual >= jugadores.size()) return null;
         Jugador j = jugadores.get(turnoActual);
-        if (!j.isActivo() || jugadoresRetirados.contains(j)) return null;
+        if (!j.isActivo() || jugadoresRetirados.contains(j) || !j.tieneFichas()) return null;
         // Si el jugador ya actuó, no es su turno (por seguridad)
         if (yaActuaron.contains(j)) return null;
         return j;
@@ -299,7 +328,7 @@ public class JuegoPoker implements Jugable {
 
 /**
  * Obtiene una copia de las cartas comunitarias actuales.
- * @return valor calculado o recuperado por el método.
+ * @return copia de la lista de cartas comunitarias.
  */
     @Override
     public List<Carta> getCartasComunitarias() {
@@ -308,7 +337,7 @@ public class JuegoPoker implements Jugable {
 
 /**
  * Obtiene el monto acumulado en el bote.
- * @return valor calculado o recuperado por el método.
+ * @return fichas acumuladas en el bote.
  */
     @Override
     public int getBote() {
@@ -317,7 +346,7 @@ public class JuegoPoker implements Jugable {
 
 /**
  * Obtiene el monto de la apuesta más alta vigente.
- * @return valor calculado o recuperado por el método.
+ * @return apuesta más alta de la ronda actual.
  */
     @Override
     public int getApuestaActual() {
@@ -326,7 +355,7 @@ public class JuegoPoker implements Jugable {
 
 /**
  * Indica si la fase actual de la ronda de apuestas ya terminó.
- * @return true si se cumple la condición evaluada; false en caso contrario.
+ * @return true si la ronda de apuestas actual terminó.
  */
     @Override
     public boolean isRondaTerminada() {
@@ -335,7 +364,7 @@ public class JuegoPoker implements Jugable {
 
 /**
  * Determina el ganador de la ronda, calcula la mejor mano y devuelve el resultado correspondiente.
- * @return valor calculado o recuperado por el método.
+ * @return resultado con el ganador, las fichas ganadas y la combinación, o null si no hay jugadores activos.
  */
     @Override
     public ResultadoRonda resolverRonda() {
@@ -385,7 +414,7 @@ public class JuegoPoker implements Jugable {
 
 /**
  * Obtiene una copia de la lista de jugadores de la partida.
- * @return valor calculado o recuperado por el método.
+ * @return copia de la lista de jugadores.
  */
     @Override
     public List<Jugador> getJugadores() {
@@ -394,7 +423,7 @@ public class JuegoPoker implements Jugable {
 
 /**
  * Obtiene el nombre de la fase actual de la partida.
- * @return valor calculado o recuperado por el método.
+ * @return nombre de la fase: PREFLOP, FLOP, TURN, RIVER o SHOWDOWN.
  */
     @Override
     public String getFaseActual() {
@@ -403,8 +432,8 @@ public class JuegoPoker implements Jugable {
 
 /**
  * Obtiene una copia de las cartas privadas del jugador indicado.
- * @param jugador valor utilizado por el método para realizar su operación.
- * @return valor calculado o recuperado por el método.
+ * @param jugador jugador cuyas cartas privadas se consultan.
+ * @return copia de las 2 cartas privadas del jugador, o una lista vacía si no tiene.
  */
     @Override
     public List<Carta> getCartasPrivadas(Jugador jugador) {
@@ -414,7 +443,7 @@ public class JuegoPoker implements Jugable {
 
 /**
  * Obtiene una copia del historial de acciones realizadas en la ronda.
- * @return valor calculado o recuperado por el método.
+ * @return copia del historial de acciones de la ronda, en orden.
  */
     public List<RegistroAccion> getHistorial() {
         return new ArrayList<>(historial);
@@ -461,9 +490,25 @@ public class JuegoPoker implements Jugable {
         }
     }
 
+    /**
+     * Calcula la apuesta total máxima que se puede exigir en la fase actual: la que puede igualar el
+     * jugador en juego con menos fichas. Con este tope todos pueden igualar cualquier subida, por lo
+     * que no hacen falta botes laterales cuando alguien apuesta todas sus fichas (all-in).
+     * @return apuesta total máxima permitida en la fase actual.
+     */
+    private int apuestaMaximaPermitida() {
+        int tope = Integer.MAX_VALUE;
+        for (Jugador j : jugadores) {
+            if (j.isActivo() && !jugadoresRetirados.contains(j)) {
+                tope = Math.min(tope, apuestasJugador.getOrDefault(j, 0) + j.getSaldoFichas());
+            }
+        }
+        return tope;
+    }
+
 /**
  * Reparte y agrega a la mesa la cantidad indicada de cartas comunitarias.
- * @param cantidad valor utilizado por el método para realizar su operación.
+ * @param cantidad número de cartas comunitarias que se reparten a la mesa.
  */
     private void repartirComunitarias(int cantidad) {
         List<Carta> nuevas = mazo.repartir(cantidad);
@@ -483,8 +528,8 @@ public class JuegoPoker implements Jugable {
 
 /**
  * Construye y evalúa la mejor mano disponible para el jugador a partir de sus cartas privadas y las comunitarias.
- * @param jugador valor utilizado por el método para realizar su operación.
- * @return valor calculado o recuperado por el método.
+ * @param jugador jugador cuya mejor mano se evalúa.
+ * @return mejor mano de 5 cartas del jugador.
  */
     private ManoPoker getMejorManoJugador(Jugador jugador) {
         List<Carta> todas = new ArrayList<>(cartasPrivadas.get(jugador));
