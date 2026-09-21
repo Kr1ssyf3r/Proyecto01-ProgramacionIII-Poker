@@ -48,7 +48,7 @@ public class VentanaPrincipal extends Application {
 
 /**
  * Configura los componentes de la interfaz y muestra la ventana principal de la aplicación.
- * @param stage valor utilizado por el método para realizar su operación.
+ * @param stage ventana principal que entrega JavaFX.
  */
     @Override
     public void start(Stage stage) {
@@ -115,8 +115,8 @@ public class VentanaPrincipal extends Application {
 
 /**
  * Recibe la acción seleccionada por el usuario y la envía a la lógica de la partida.
- * @param accion valor utilizado por el método para realizar su operación.
- * @param monto valor utilizado por el método para realizar su operación.
+ * @param accion acción que el usuario eligió en los controles.
+ * @param monto monto que ingresó el usuario (0 si la acción no lo requiere).
  */
     private void onAccionHumana(AccionPoker accion, int monto) {
         Map<Jugador, Integer> saldosAntes = capturarSaldos();
@@ -134,7 +134,7 @@ public class VentanaPrincipal extends Application {
 
 /**
  * Recorre las acciones recientes y las muestra progresivamente en la interfaz.
- * @param alTerminar valor utilizado por el método para realizar su operación.
+ * @param alTerminar acción que se ejecuta al terminar la narración (puede ser null).
  */
     private void narrarNuevasJugadas(Runnable alTerminar) {
         List<RegistroAccion> historialCompleto = juego.getHistorial();
@@ -176,8 +176,8 @@ public class VentanaPrincipal extends Application {
 
 /**
  * Convierte un registro de acción en un texto legible para la interfaz.
- * @param registro valor utilizado por el método para realizar su operación.
- * @return valor calculado o recuperado por el método.
+ * @param registro jugada que se quiere describir.
+ * @return frase que describe la jugada.
  */
     private String describirJugada(RegistroAccion registro) {
         String nombre = registro.jugador().getNombre();
@@ -191,7 +191,7 @@ public class VentanaPrincipal extends Application {
 
 /**
  * Captura los saldos de los jugadores antes de finalizar la ronda.
- * @return resultado de tipo Integer>.
+ * @return mapa con el saldo actual de cada jugador.
  */
     private Map<Jugador, Integer> capturarSaldos() {
         Map<Jugador, Integer> saldos = new HashMap<>();
@@ -231,7 +231,7 @@ public class VentanaPrincipal extends Application {
 
 /**
  * Comprueba si la ronda terminó y presenta el resultado al usuario cuando corresponde.
- * @param saldosAntes valor utilizado por el método para realizar su operación.
+ * @param saldosAntes saldo de fichas de cada jugador antes de la acción.
  */
     private void revisarFinDeRonda(Map<Jugador, Integer> saldosAntes) {
         if (!juego.isRondaTerminada()) {
@@ -273,9 +273,9 @@ public class VentanaPrincipal extends Application {
 
 /**
  * Muestra un resumen visual del ganador, las fichas ganadas y la combinación obtenida.
- * @param nombreGanador valor utilizado por el método para realizar su operación.
- * @param fichasGanadas valor utilizado por el método para realizar su operación.
- * @param combinacionGanadora valor utilizado por el método para realizar su operación.
+ * @param nombreGanador nombre del jugador que ganó la ronda.
+ * @param fichasGanadas fichas que se lleva el ganador.
+ * @param combinacionGanadora combinación ganadora, o null si los demás jugadores se retiraron.
  */
     private void mostrarFinDeRonda(String nombreGanador, int fichasGanadas, CombinacionPoker combinacionGanadora) {
         StringBuilder mensaje = new StringBuilder();
@@ -307,8 +307,8 @@ public class VentanaPrincipal extends Application {
 
 /**
  * Convierte el nombre interno de una combinación de póker en un texto amigable para el usuario.
- * @param combinacion valor utilizado por el método para realizar su operación.
- * @return valor calculado o recuperado por el método.
+ * @param combinacion combinación de póker que se quiere convertir en texto.
+ * @return nombre en español de la combinación de póker.
  */
     private String nombreLegible(CombinacionPoker combinacion) {
         return switch (combinacion) {
@@ -327,7 +327,7 @@ public class VentanaPrincipal extends Application {
 
 /**
  * Muestra un mensaje de error al usuario mediante un diálogo de JavaFX.
- * @param mensaje valor utilizado por el método para realizar su operación.
+ * @param mensaje texto del error que se muestra al usuario.
  */
     private void mostrarError(String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.ERROR, mensaje);

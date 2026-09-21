@@ -34,7 +34,7 @@ public class PanelJugador extends VBox {
 
 /**
  * Crea una nueva instancia de PanelJugador con los datos recibidos.
- * @param jugador valor utilizado por el método para realizar su operación.
+ * @param jugador jugador que representa el panel.
  */
     public PanelJugador(Jugador jugador) {
         setSpacing(4);
@@ -62,7 +62,7 @@ public class PanelJugador extends VBox {
 
 /**
  * Crea y configura un ImageView reutilizable para una carta.
- * @return valor calculado o recuperado por el método.
+ * @return ImageView de tamaño fijo para mostrar una carta.
  */
     private ImageView crearImageView() {
         ImageView iv = new ImageView();
@@ -73,7 +73,7 @@ public class PanelJugador extends VBox {
 
 /**
  * Sincroniza el panel visual con los datos actuales del jugador recibido.
- * @param jugador valor utilizado por el método para realizar su operación.
+ * @param jugador jugador cuyos datos (fichas y estado) se muestran.
  */
     public void actualizarDesde(Jugador jugador) {
         lblSaldo.setText("Fichas: " + jugador.getSaldoFichas());
@@ -86,7 +86,7 @@ public class PanelJugador extends VBox {
 
 /**
  * Muestra las cartas recibidas utilizando las imágenes disponibles.
- * @param cartas valor utilizado por el método para realizar su operación.
+ * @param cartas cartas privadas que se muestran (las dos del jugador).
  */
     public void mostrarCartas(List<Carta> cartas) {
         if (cartas.size() > 0) imgCarta1.setImage(CartaImagenes.obtener(cartas.get(0)));
@@ -103,7 +103,7 @@ public class PanelJugador extends VBox {
 
 /**
  * Obtiene el nombre del jugador.
- * @return valor calculado o recuperado por el método.
+ * @return nombre del jugador del panel.
  */
     public String getNombre() {
         return lblNombre.getText();

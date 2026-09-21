@@ -60,7 +60,7 @@ public class PanelControles extends HBox {
 
 /**
  * Registra el receptor que será notificado cuando el usuario confirme una acción.
- * @param listener valor utilizado por el método para realizar su operación.
+ * @param listener objeto que recibe la acción y el monto cuando el usuario los confirma.
  */
     public void setOnAccion(OnAccion listener) {
         this.listener = listener;
@@ -68,7 +68,7 @@ public class PanelControles extends HBox {
 
 /**
  * Actualiza la cantidad de fichas disponibles del jugador humano.
- * @param saldoDisponible valor utilizado por el método para realizar su operación.
+ * @param saldoDisponible fichas que tiene disponibles el jugador.
  */
     public void setSaldoDisponible(int saldoDisponible) {
         this.saldoDisponible = saldoDisponible;
@@ -76,7 +76,7 @@ public class PanelControles extends HBox {
 
 /**
  * Actualiza la apuesta vigente y ajusta el estado de los botones de control.
- * @param apuestaActual valor utilizado por el método para realizar su operación.
+ * @param apuestaActual apuesta más alta vigente; con 0 se habilita Check y con más de 0 se habilita Call.
  */
     public void setApuestaActual(int apuestaActual) {
         this.apuestaActual = apuestaActual;
@@ -148,8 +148,8 @@ public class PanelControles extends HBox {
 
 /**
  * Notifica al controlador de la interfaz la acción confirmada y su monto asociado.
- * @param accion valor utilizado por el método para realizar su operación.
- * @param monto valor utilizado por el método para realizar su operación.
+ * @param accion acción confirmada por el usuario.
+ * @param monto monto de la acción (0 si no aplica).
  */
     private void notificar(AccionPoker accion, int monto) {
         if (listener != null) {
@@ -163,7 +163,7 @@ public class PanelControles extends HBox {
 
 /**
  * Muestra un mensaje de error al usuario mediante un diálogo de JavaFX.
- * @param mensaje valor utilizado por el método para realizar su operación.
+ * @param mensaje texto del error que se muestra al usuario.
  */
     private void mostrarError(String mensaje) {
         Alert alerta = new Alert(Alert.AlertType.ERROR, mensaje);

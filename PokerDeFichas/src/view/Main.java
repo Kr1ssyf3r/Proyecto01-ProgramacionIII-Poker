@@ -8,7 +8,7 @@ import javafx.application.Application;
 public class Main {
 /**
  * Inicia la aplicación JavaFX utilizando la ventana principal.
- * @param args valor utilizado por el método para realizar su operación.
+ * @param args argumentos de línea de comandos (no se usan).
  */
     public static void main(String[] args) {
         Application.launch(VentanaPrincipal.class, args);

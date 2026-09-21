@@ -15,10 +15,7 @@ import java.util.Map;
  */
 public class CartaImagenes {
 
-/**
- * Realiza la operación asociada al método HashMap<>.
- * @return resultado de tipo new.
- */
+/** Caché de imágenes ya cargadas, para no leer el archivo de una carta más de una vez. */
     private static final Map<Carta, Image> cache = new HashMap<>();
     private static Image reverso;
 
@@ -30,8 +27,8 @@ public class CartaImagenes {
 
 /**
  * Obtiene la imagen correspondiente a la carta indicada utilizando la caché de imágenes.
- * @param carta valor utilizado por el método para realizar su operación.
- * @return valor calculado o recuperado por el método.
+ * @param carta carta cuya imagen o nombre de archivo se necesita.
+ * @return imagen de la carta (se guarda en caché después de leerla).
  */
     public static Image obtener(Carta carta) {
         return cache.computeIfAbsent(carta, c -> cargar(nombreArchivo(c)));
@@ -39,7 +36,7 @@ public class CartaImagenes {
 
 /**
  * Obtiene la imagen del reverso de una carta.
- * @return valor calculado o recuperado por el método.
+ * @return imagen del reverso de una carta.
  */
     public static Image obtenerReverso() {
         if (reverso == null) {
@@ -50,8 +47,8 @@ public class CartaImagenes {
 
 /**
  * Construye el nombre del archivo de imagen correspondiente a una carta.
- * @param carta valor utilizado por el método para realizar su operación.
- * @return valor calculado o recuperado por el método.
+ * @param carta carta cuya imagen o nombre de archivo se necesita.
+ * @return nombre del archivo de imagen, por ejemplo "ace_of_spades.png".
  */
     private static String nombreArchivo(Carta carta) {
         String valor = switch (carta.getValor()) {
@@ -72,8 +69,8 @@ public class CartaImagenes {
 
 /**
  * Carga desde los recursos la imagen indicada.
- * @param nombreArchivo valor utilizado por el método para realizar su operación.
- * @return valor calculado o recuperado por el método.
+ * @param nombreArchivo nombre del archivo de imagen dentro de la carpeta de recursos /cartas.
+ * @return imagen leída de los recursos; lanza IllegalStateException si el archivo no existe.
  */
     private static Image cargar(String nombreArchivo) {
         String ruta = "/cartas/" + nombreArchivo;

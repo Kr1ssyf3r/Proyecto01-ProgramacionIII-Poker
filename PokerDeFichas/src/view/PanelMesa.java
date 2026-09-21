@@ -49,7 +49,7 @@ public class PanelMesa extends VBox {
 
 /**
  * Actualiza el texto que muestra el monto actual del pozo.
- * @param nuevoPozo valor utilizado por el método para realizar su operación.
+ * @param nuevoPozo monto actual del pozo.
  */
     public void actualizarPozo(int nuevoPozo) {
         lblPozo.setText("Pozo: " + nuevoPozo);
@@ -57,7 +57,7 @@ public class PanelMesa extends VBox {
 
 /**
  * Actualiza el panel visual con las cartas comunitarias disponibles.
- * @param cartas valor utilizado por el método para realizar su operación.
+ * @param cartas cartas comunitarias reveladas hasta el momento.
  */
     public void actualizarCartasComunitarias(List<Carta> cartas) {
         cartasComunitarias.getChildren().clear();
