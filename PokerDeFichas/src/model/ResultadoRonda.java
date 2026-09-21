@@ -12,9 +12,9 @@ public class ResultadoRonda {
     //se genera el resultado de una ronda
 /**
  * Crea una nueva instancia de ResultadoRonda con los datos recibidos.
- * @param ganador valor utilizado por el método para realizar su operación.
- * @param fichasGanadas valor utilizado por el método para realizar su operación.
- * @param combinacionGanadora valor utilizado por el método para realizar su operación.
+ * @param ganador jugador que ganó la ronda.
+ * @param fichasGanadas fichas que se lleva el ganador.
+ * @param combinacionGanadora combinación con la que ganó la ronda.
  */
     public ResultadoRonda(Jugador ganador, int fichasGanadas, CombinacionPoker combinacionGanadora) {
         this.ganador = ganador;
@@ -25,28 +25,28 @@ public class ResultadoRonda {
     //obtiene el jugador ganador de la ronda
 /**
  * Obtiene el jugador ganador de la ronda.
- * @return resultado de tipo Jugador.
+ * @return jugador que ganó la ronda.
  */
     public Jugador getGanador(){ return ganador; }
 
     //obtiene las fichas ganadas en la ronda
 /**
  * Obtiene la cantidad de fichas ganadas.
- * @return resultado de tipo int.
+ * @return fichas que ganó el jugador.
  */
     public int getFichasGanadas() {return fichasGanadas; }
 
     //obtiene la combinacion de poker con la que se gano la ronda
 /**
  * Obtiene la combinación de póquer ganadora.
- * @return resultado de tipo CombinacionPoker.
+ * @return combinación con la que se ganó la ronda.
  */
     public CombinacionPoker getCombinacionGanadora() {return combinacionGanadora; }
 
     //para imprimir en pantalla el resultado
 /**
  * Devuelve una representación textual legible del objeto.
- * @return valor calculado o recuperado por el método.
+ * @return texto como "Ana gana 60 fichas con PAR".
  */
     @Override
     public String toString() {

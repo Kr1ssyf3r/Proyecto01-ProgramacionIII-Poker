@@ -23,7 +23,7 @@ public enum Palo {
     //getSimbolo() retorna el simbolo correspondiente
 /**
  * Obtiene el símbolo del palo.
- * @return resultado de tipo String.
+ * @return símbolo del palo (♥, ♦, ♣ o ♠).
  */
     public String getSimbolo() {return simbolo; }
 }

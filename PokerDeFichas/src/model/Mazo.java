@@ -18,7 +18,7 @@ public class Mazo<T> {
     //  con las que arranca el mazo
 /**
  * Crea una nueva instancia de Mazo con los datos recibidos.
- * @param cartasIniciales valor utilizado por el método para realizar su operación.
+ * @param cartasIniciales elementos con los que se crea el mazo.
  */
     public Mazo(List<T> cartasIniciales) {
         this.cartasOriginales = new ArrayList<>(cartasIniciales);
@@ -36,7 +36,7 @@ public class Mazo<T> {
     //extrae una carta de la parte superior del mazo y lanza una excepcion si el mazo esta vacio
 /**
  * Extrae y devuelve una carta del mazo.
- * @return valor calculado o recuperado por el método.
+ * @return elemento que estaba en la parte superior del mazo.
  */
     public T repartirUna() {
         if(cartas.isEmpty()){
@@ -48,8 +48,8 @@ public class Mazo<T> {
     //reparte varias cartas de una sola vez
 /**
  * Extrae la cantidad indicada de elementos del mazo y los devuelve.
- * @param cantidad valor utilizado por el método para realizar su operación.
- * @return valor calculado o recuperado por el método.
+ * @param cantidad número de elementos que se extraen del mazo.
+ * @return lista con los elementos extraídos del mazo.
  */
     public List<T> repartir(int cantidad) {
         if (cantidad > cartas.size()) {
@@ -75,17 +75,15 @@ public class Mazo<T> {
 
     // se indican cuantas cartas quedan en el mazo, muestra cantidad restante
 /**
- * Realiza la operación asociada al método cartasRestantes.
- * @param cartas.size( parámetro de entrada del método.
- * @return resultado de tipo int.
+ * Indica cuántos elementos quedan en el mazo.
+ * @return cantidad de elementos que quedan en el mazo.
  */
     public int cartasRestantes() { return cartas.size();}
 
     //indica si el mazo contiene cartas
 /**
- * Realiza la operación asociada al método estaVacio.
- * @param cartas.isEmpty( parámetro de entrada del método.
- * @return resultado de tipo boolean.
+ * Indica si el mazo se quedó sin elementos.
+ * @return true si el mazo no tiene elementos.
  */
     public boolean estaVacio() { return cartas.isEmpty();}
 
@@ -93,7 +91,7 @@ public class Mazo<T> {
     // con las 52 cartas ya mezcladas estandar.
 /**
  * Crea un mazo estándar de 52 cartas y lo devuelve barajado.
- * @return valor calculado o recuperado por el método.
+ * @return mazo de 52 cartas ya mezclado.
  */
     public static Mazo<Carta> crearMazoPoker() {
         List<Carta> cartas = new ArrayList<>();

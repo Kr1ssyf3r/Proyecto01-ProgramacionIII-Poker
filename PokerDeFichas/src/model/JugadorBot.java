@@ -1,4 +1,4 @@
-zpackage model;
+package model;
 
 import juego.EstrategiaApuesta;
 
@@ -32,7 +32,7 @@ public class JugadorBot extends Jugador {
 
 /**
  * Cambia la estrategia de apuestas utilizada por el bot.
- * @param estrategia valor utilizado por el método para realizar su operación.
+ * @param estrategia estrategia de apuestas del bot (no puede ser null).
  */
 
     public void setEstrategia(EstrategiaApuesta estrategia) {
@@ -48,7 +48,7 @@ public class JugadorBot extends Jugador {
 
 /**
  * Obtiene la estrategia de apuestas configurada para el bot.
- * @return valor calculado o recuperado por el método.
+ * @return estrategia de apuestas actual del bot.
  */
 
     public EstrategiaApuesta getEstrategia() {
@@ -58,10 +58,10 @@ public class JugadorBot extends Jugador {
     /**Decide qué acción realizar durante su turno.*/
 
 /**
- * Determina la acción que debe realizar el jugador o bot según la apuesta y el bote actuales.
- * @param apuestaActual valor utilizado por el método para realizar su operación.
- * @param boteActual valor utilizado por el método para realizar su operación.
- * @return valor calculado o recuperado por el método.
+ * Delega en la estrategia del bot la decisión de la acción a realizar.
+ * @param apuestaActual apuesta más alta vigente en la ronda actual.
+ * @param boteActual monto acumulado en el bote.
+ * @return acción que indica la estrategia del bot: CHECK, CALL, FOLD o RAISE.
  */
     @Override
     public AccionPoker decidirAccion(int apuestaActual, int boteActual) {

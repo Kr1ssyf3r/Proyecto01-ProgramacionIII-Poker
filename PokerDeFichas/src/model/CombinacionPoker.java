@@ -24,7 +24,7 @@ public enum CombinacionPoker {
 
 /**
  * Obtiene el valor numérico de la carta o combinación.
- * @return valor calculado o recuperado por el método.
+ * @return valor numérico de la combinación (de 1 a 10).
  */
     public int getValor() {
         return valor;
@@ -32,8 +32,8 @@ public enum CombinacionPoker {
 
 /**
  * Indica si esta combinación tiene mayor jerarquía que otra.
- * @param otra valor utilizado por el método para realizar su operación.
- * @return true si se cumple la condición evaluada; false en caso contrario.
+ * @param otra combinación con la que se compara.
+ * @return true si esta combinación vale más que la otra.
  */
     public boolean esMayorQue(CombinacionPoker otra) {
         return this.valor > otra.valor;

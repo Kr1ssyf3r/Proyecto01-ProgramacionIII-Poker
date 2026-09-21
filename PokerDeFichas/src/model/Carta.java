@@ -13,8 +13,8 @@ public class Carta {
     //Crea una nueva carta con el palo y valor, recibe por parámetro
 /**
  * Crea una nueva instancia de Carta con los datos recibidos.
- * @param palo valor utilizado por el método para realizar su operación.
- * @param valor valor utilizado por el método para realizar su operación.
+ * @param palo palo de la carta.
+ * @param valor valor de la carta, entre 2 y 14 (11 = J, 12 = Q, 13 = K, 14 = As).
  */
     public Carta (Palo palo, int valor) {
         if (valor < 2 || valor > 14) {
@@ -26,7 +26,7 @@ public class Carta {
     //getters del palo y del valor de la carta
 /**
  * Obtiene el palo de la carta.
- * @return resultado de tipo Palo.
+ * @return palo de la carta.
  */
     public Palo getPalo() {return palo; }
 
@@ -40,7 +40,7 @@ public class Carta {
     //convertidor del valor numérico a su representación en carta
 /**
  * Obtiene la representación textual del valor de la carta.
- * @return valor calculado o recuperado por el método.
+ * @return texto del valor: "J", "Q", "K", "A" o el número de la carta.
  */
     public String getNombreValor(){
         return switch (valor) {
@@ -55,7 +55,7 @@ public class Carta {
     //toString() muestra en pantalla la carta con letra y palo correspondiente
 /**
  * Devuelve una representación textual legible del objeto.
- * @return valor calculado o recuperado por el método.
+ * @return texto con el valor y el símbolo del palo, por ejemplo "A♠".
  */
     @Override
     public String toString() {
@@ -65,8 +65,8 @@ public class Carta {
     //Determina si dos cartas son iguales (mismo palo o mismo valor). Retorna true si son iguales y false en caso contrario
 /**
  * Compara el objeto actual con otro para determinar si representan la misma entidad.
- * @param obj valor utilizado por el método para realizar su operación.
- * @return true si se cumple la condición evaluada; false en caso contrario.
+ * @param obj objeto con el que se compara la carta.
+ * @return true si ambas cartas tienen el mismo palo y el mismo valor.
  */
     @Override
     public boolean equals(Object obj) {
@@ -78,7 +78,7 @@ public class Carta {
     //en continuación al equals(), se requiere para manejar las cartas y utilizar las colecciones de HashMap o HashSet
 /**
  * Calcula el código hash del objeto a partir de sus atributos relevantes.
- * @return valor calculado o recuperado por el método.
+ * @return código hash calculado con el palo y el valor.
  */
     @Override
     public int hashCode(){

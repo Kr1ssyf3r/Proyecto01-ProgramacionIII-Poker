@@ -1,11 +1,10 @@
 package model;
 
 /**
- * Realiza la operación correspondiente al método RegistroAccion sobre los datos recibidos.
- * @param jugador valor utilizado por el método para realizar su operación.
- * @param accion valor utilizado por el método para realizar su operación.
- * @param monto valor utilizado por el método para realizar su operación.
- * @return valor calculado o recuperado por el método.
+ * Registro inmutable de una jugada: quién la hizo, qué acción fue y con qué monto.
+ * @param jugador jugador que realizó la acción.
+ * @param accion acción que realizó el jugador.
+ * @param monto monto asociado a la acción (0 si no aplica).
  */
 public record RegistroAccion(Jugador jugador, AccionPoker accion, int monto) {
 }
