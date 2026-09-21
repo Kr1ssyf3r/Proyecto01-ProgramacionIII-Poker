@@ -13,7 +13,7 @@ public class SaldoInsuficienteException extends Exception {
 
 /**
  * Crea una nueva instancia de SaldoInsuficienteException con los datos recibidos.
- * @param mensaje valor utilizado por el método para realizar su operación.
+ * @param mensaje mensaje que describe el error.
  */
     public SaldoInsuficienteException(String mensaje) {
         super(mensaje);
@@ -21,8 +21,8 @@ public class SaldoInsuficienteException extends Exception {
 
 /**
  * Crea una nueva instancia de SaldoInsuficienteException con los datos recibidos.
- * @param mensaje valor utilizado por el método para realizar su operación.
- * @param causa valor utilizado por el método para realizar su operación.
+ * @param mensaje mensaje que describe el error.
+ * @param causa excepción original que provocó este error.
  */
     public SaldoInsuficienteException(String mensaje, Throwable causa) {
         super(mensaje, causa);

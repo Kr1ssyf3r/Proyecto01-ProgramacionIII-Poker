@@ -26,7 +26,7 @@ public class Validaciones {
 
 /**
  * Valida que el monto recibido sea mayor que cero.
- * @param monto valor utilizado por el método para realizar su operación.
+ * @param monto monto que se valida.
  * @throws ApuestaInvalidaException si los datos recibidos no cumplen las reglas requeridas.
  */
     public static void validarMontoPositivo(int monto) throws ApuestaInvalidaException {
@@ -39,8 +39,8 @@ public class Validaciones {
 
 /**
  * Valida que el saldo disponible sea suficiente para cubrir el monto indicado.
- * @param monto valor utilizado por el método para realizar su operación.
- * @param saldoDisponible valor utilizado por el método para realizar su operación.
+ * @param monto monto que se quiere apostar.
+ * @param saldoDisponible fichas que tiene disponibles el jugador.
  * @throws SaldoInsuficienteException si los datos recibidos no cumplen las reglas requeridas.
  */
     public static void validarSaldoSuficiente(int monto, int saldoDisponible) throws SaldoInsuficienteException {
@@ -54,8 +54,8 @@ public class Validaciones {
 
 /**
  * Valida conjuntamente que la apuesta sea positiva y que el jugador tenga saldo suficiente.
- * @param monto valor utilizado por el método para realizar su operación.
- * @param saldoDisponible valor utilizado por el método para realizar su operación.
+ * @param monto monto que se quiere apostar.
+ * @param saldoDisponible fichas que tiene disponibles el jugador.
  */
     public static void validarApuesta(int monto, int saldoDisponible)
             throws ApuestaInvalidaException, SaldoInsuficienteException {
@@ -65,9 +65,9 @@ public class Validaciones {
 
 /**
  * Valida que la nueva apuesta sea válida y superior a la apuesta actual.
- * @param nuevoMonto valor utilizado por el método para realizar su operación.
- * @param apuestaActual valor utilizado por el método para realizar su operación.
- * @param saldoDisponible valor utilizado por el método para realizar su operación.
+ * @param nuevoMonto monto total al que se quiere subir la apuesta.
+ * @param apuestaActual apuesta más alta vigente, que la subida debe superar.
+ * @param saldoDisponible fichas que tiene disponibles el jugador.
  */
     public static void validarSubida(int nuevoMonto, int apuestaActual, int saldoDisponible)
             throws ApuestaInvalidaException, SaldoInsuficienteException {
