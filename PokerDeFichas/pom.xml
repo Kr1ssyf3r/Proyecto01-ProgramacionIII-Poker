@@ -15,7 +15,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <javafx.version>21.0.1</javafx.version>
     <!-- Clase que extiende Application; será la que lance la ventana -->
-    <main.class>view.VentanaPrincipal</main.class>
+    <main.class>cr.ac.una.est.pokerdefichas/view.VentanaPrincipal</main.class>
   </properties>
 
   <dependencies>
