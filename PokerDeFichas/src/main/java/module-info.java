@@ -1,6 +1,8 @@
 module cr.ac.una.est.pokerdefichas {
     requires javafx.controls;
     requires javafx.fxml;
+    requires java.sql;
+    requires mysql.connector.j;
 
     // "view" se abre a javafx.fxml por si más adelante cargan pantallas
     // desde archivos .fxml (reflexión). Si nunca usan FXML, "opens" no
