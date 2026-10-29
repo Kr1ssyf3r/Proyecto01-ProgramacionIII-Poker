@@ -1,4 +1,4 @@
-package com.una.pokerdefichas.modelo;
+package main.java.model;
 
 //Posibles acciones que un jugador puede tomar durante su turno
 

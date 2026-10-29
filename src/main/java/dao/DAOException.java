@@ -1,4 +1,4 @@
-package dao;
+package main.java.dao;
 
 /**
  * Excepción de la capa de persistencia. Envuelve los errores de SQL con un mensaje

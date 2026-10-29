@@ -1,4 +1,4 @@
-package model;
+package main.java.model;
 
 /**
  * Perfil persistente de un jugador humano: su identificador en la base de datos,
