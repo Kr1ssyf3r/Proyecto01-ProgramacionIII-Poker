@@ -3,7 +3,10 @@ package view;
 import juego.BotAgresivo;
 import juego.BotConservador;
 import juego.JuegoPoker;
+import dao.JugadorDAO;
+import dao.JugadorDAOJdbc;
 import model.*;
+import javafx.concurrent.Task;
 import javafx.application.Application;
 import javafx.application.Platform;
 import javafx.geometry.Insets;
@@ -35,6 +38,11 @@ public class VentanaPrincipal extends Application {
     private JugadorBot bot1;
     private JugadorBot bot2;
 
+    /** Acceso a los perfiles guardados en MySQL. */
+    private final JugadorDAO jugadorDAO = new JugadorDAOJdbc();
+    /** Perfil con el que se está jugando; sus fichas se guardan al terminar cada ronda. */
+    private PerfilJugador perfilActual;
+
     private PanelJugador panelHumano;
     private PanelJugador panelBot1;
     private PanelJugador panelBot2;
@@ -47,12 +55,27 @@ public class VentanaPrincipal extends Application {
     private static final Duration PAUSA_ENTRE_JUGADAS = Duration.seconds(1.5);
 
 /**
- * Configura los componentes de la interfaz y muestra la ventana principal de la aplicación.
+ * Muestra la pantalla de selección de perfiles; la partida arranca cuando el usuario
+ * elige un perfil.
  * @param stage ventana principal que entrega JavaFX.
  */
     @Override
     public void start(Stage stage) {
-        jugadorHumano = new JugadorHumano("Jugador", 500);
+        PerfilesVista perfiles = new PerfilesVista(jugadorDAO, perfil -> iniciarPartida(stage, perfil));
+        stage.setTitle("Póker de Fichas - Perfiles");
+        stage.setScene(new Scene(perfiles, 520, 430));
+        stage.show();
+    }
+
+/**
+ * Configura los componentes de la interfaz de la mesa y arranca la partida con el perfil
+ * elegido (sus fichas guardadas reemplazan las 500 fijas del Proyecto 1).
+ * @param stage ventana principal donde se muestra la mesa.
+ * @param perfil perfil de jugador elegido en la pantalla de perfiles.
+ */
+    private void iniciarPartida(Stage stage, PerfilJugador perfil) {
+        perfilActual = perfil;
+        jugadorHumano = new JugadorHumano(perfil.getNombre(), perfil.getFichas());
         bot1 = new JugadorBot("Bot Conservador", 500, new BotConservador());
         bot2 = new JugadorBot("Bot Agresivo", 500, new BotAgresivo());
 
@@ -97,6 +120,8 @@ public class VentanaPrincipal extends Application {
         Scene escena = new Scene(raiz, 850, 680);
         stage.setTitle("Póker de Fichas");
         stage.setScene(escena);
+        stage.sizeToScene();
+        stage.centerOnScreen();
         stage.show();
 
         iniciarNuevaRonda();
@@ -242,11 +267,13 @@ public class VentanaPrincipal extends Application {
 
         if ("SHOWDOWN".equals(juego.getFaseActual())) {
             ResultadoRonda resultado = juego.resolverRonda();
+            guardarFichasPerfil(); // las fichas ya incluyen el bote ganado
             if (resultado != null) {
                 mostrarFinDeRonda(resultado.getGanador().getNombre(),
                         resultado.getFichasGanadas(), resultado.getCombinacionGanadora());
             }
         } else {
+            guardarFichasPerfil();
             Jugador ganador = null;
             int fichasGanadas = 0;
             for (Jugador j : juego.getJugadores()) {
@@ -323,6 +350,36 @@ public class VentanaPrincipal extends Application {
             case ESCALERA_COLOR -> "Escalera de Color";
             case ESCALERA_REAL -> "Escalera Real";
         };
+    }
+
+/**
+ * Guarda en MySQL las fichas actuales del jugador humano en su perfil. Corre en un hilo
+ * aparte (Task) para no congelar la interfaz; si falla, avisa sin cerrar la aplicación.
+ */
+    private void guardarFichasPerfil() {
+        if (perfilActual == null) {
+            return;
+        }
+        final int id = perfilActual.getId();
+        final int fichas = jugadorHumano.getSaldoFichas();
+        perfilActual.setFichas(fichas);
+
+        Task<Boolean> tarea = new Task<>() {
+            /**
+             * Corre en el hilo de fondo y actualiza las fichas del perfil en la base de datos.
+             * @return true si se actualizó el perfil.
+             * @throws Exception si falla el acceso a la base de datos.
+             */
+            @Override
+            protected Boolean call() throws Exception {
+                return jugadorDAO.actualizarFichas(id, fichas);
+            }
+        };
+        tarea.setOnFailed(e -> mostrarError("No se pudieron guardar las fichas: "
+                + tarea.getException().getMessage()));
+        Thread hilo = new Thread(tarea, "hilo-guardar-fichas");
+        hilo.setDaemon(true);
+        hilo.start();
     }
 
 /**
