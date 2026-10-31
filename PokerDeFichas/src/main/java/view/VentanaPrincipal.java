@@ -5,6 +5,8 @@ import juego.BotConservador;
 import juego.JuegoPoker;
 import dao.JugadorDAO;
 import dao.JugadorDAOJdbc;
+import dao.ManoDAO;
+import dao.ManoDAOJdbc;
 import model.*;
 import javafx.concurrent.Task;
 import javafx.application.Application;
@@ -42,7 +44,15 @@ public class VentanaPrincipal extends Application {
     private final JugadorDAO jugadorDAO = new JugadorDAOJdbc();
     /** Perfil con el que se está jugando; sus fichas se guardan al terminar cada ronda. */
     private PerfilJugador perfilActual;
-
+    /** Acceso al historial de manos guardado en MySQL. */
+    private final ManoDAO manoDAO = new ManoDAOJdbc();
+    /** Saldo de cada jugador al empezar la ronda (para guardar fichas antes y después). */
+    private Map<Jugador, Integer> saldosInicioRonda = new HashMap<>();
+    /** Evita guardar dos veces la misma mano. */
+    private boolean manoGuardada = false;
+    /** Acceso a las manos guardadas en MySQL. */
+    private final ManoDAO manoDAO = new ManoDAOJdbc();
+    
     private PanelJugador panelHumano;
     private PanelJugador panelBot1;
     private PanelJugador panelBot2;
@@ -137,6 +147,8 @@ public class VentanaPrincipal extends Application {
         ultimoIndiceHistorial = 0;
         panelBot1.ocultarCartas();
         panelBot2.ocultarCartas();
+        saldosInicioRonda = capturarSaldos();
+        manoGuardada = false;
         juego.iniciarRonda();
         narrarNuevasJugadas(this::refrescarUI);
     }
@@ -272,6 +284,8 @@ public class VentanaPrincipal extends Application {
             ResultadoRonda resultado = juego.resolverRonda();
             guardarFichasPerfil(); // las fichas ya incluyen el bote ganado
             if (resultado != null) {
+                guardarManoEnHistorial(resultado.getGanador().getNombre(),
+                        resultado.getFichasGanadas(), resultado.getCombinacionGanadora());
                 mostrarFinDeRonda(resultado.getGanador().getNombre(),
                         resultado.getFichasGanadas(), resultado.getCombinacionGanadora());
             }
@@ -287,7 +301,9 @@ public class VentanaPrincipal extends Application {
                     fichasGanadas = despues - antes;
                 }
             }
-            String nombreGanador = ganador != null ? ganador.getNombre() : "Nadie";
+            String nombreGanador = ganador != null ? ganador.getNombre() : "Nadie";                    if (ganador != null) {
+            guardarManoEnHistorial(nombreGanador, fichasGanadas, "SIN_SHOWDOWN");
+        }
             mostrarFinDeRonda(nombreGanador, fichasGanadas, null);
         }
         refrescarUI();
@@ -381,6 +397,48 @@ public class VentanaPrincipal extends Application {
         tarea.setOnFailed(e -> mostrarError("No se pudieron guardar las fichas: "
                 + tarea.getException().getMessage()));
         Thread hilo = new Thread(tarea, "hilo-guardar-fichas");
+        hilo.setDaemon(true);
+        hilo.start();
+    }
+
+/**
+ * Guarda la mano que acaba de terminar en el historial de MySQL. Corre en un hilo aparte
+ * (Task) para no congelar la interfaz; si falla, avisa sin cerrar la aplicación.
+ * @param ganador nombre del ganador de la mano.
+ * @param bote fichas ganadas.
+ * @param combinacion combinación ganadora, o SIN_SHOWDOWN si todos se retiraron.
+ */
+    private void guardarManoEnHistorial(String ganador, int bote, String combinacion) {
+        if (manoGuardada) {
+            return;
+        }
+        manoGuardada = true;
+
+        List<DatosMano.Participacion> participaciones = new ArrayList<>();
+        for (Jugador j : juego.getJugadores()) {
+            participaciones.add(new DatosMano.Participacion(j.getNombre(),
+                    saldosInicioRonda.getOrDefault(j, j.getSaldoFichas()), j.getSaldoFichas()));
+        }
+        List<DatosMano.Jugada> jugadas = new ArrayList<>();
+        for (RegistroAccion r : juego.getHistorial()) {
+            jugadas.add(new DatosMano.Jugada(r.jugador().getNombre(), r.accion().name(), r.monto()));
+        }
+        final DatosMano datos = new DatosMano(ganador, bote, combinacion, participaciones, jugadas);
+
+        Task<Integer> tarea = new Task<>() {
+            /**
+             * Corre en el hilo de fondo y guarda la mano en la base de datos.
+             * @return id de la mano guardada.
+             * @throws Exception si falla el acceso a la base de datos.
+             */
+            @Override
+            protected Integer call() throws Exception {
+                return manoDAO.guardar(datos);
+            }
+        };
+        tarea.setOnFailed(e -> mostrarError("No se pudo guardar la mano: "
+                + tarea.getException().getMessage()));
+        Thread hilo = new Thread(tarea, "hilo-guardar-mano");
         hilo.setDaemon(true);
         hilo.start();
     }
