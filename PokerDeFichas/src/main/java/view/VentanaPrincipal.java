@@ -107,7 +107,10 @@ public class VentanaPrincipal extends Application {
         Button btnNuevaRonda = new Button("Nueva ronda");
         btnNuevaRonda.setOnAction(e -> iniciarNuevaRonda());
 
-        HBox filaHumano = new HBox(20, panelHumano, controles, btnNuevaRonda);
+        Button btnHistorial = new Button("Historial");
+        btnHistorial.setOnAction(e -> mostrarHistorial());
+
+        HBox filaHumano = new HBox(20, panelHumano, controles, btnNuevaRonda, btnHistorial);
         filaHumano.setAlignment(Pos.CENTER);
         filaHumano.setPadding(new Insets(10));
 
