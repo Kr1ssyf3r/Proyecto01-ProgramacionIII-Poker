@@ -50,8 +50,6 @@ public class VentanaPrincipal extends Application {
     private Map<Jugador, Integer> saldosInicioRonda = new HashMap<>();
     /** Evita guardar dos veces la misma mano. */
     private boolean manoGuardada = false;
-    /** Acceso a las manos guardadas en MySQL. */
-    private final ManoDAO manoDAO = new ManoDAOJdbc();
     
     private PanelJugador panelHumano;
     private PanelJugador panelBot1;
@@ -285,7 +283,7 @@ public class VentanaPrincipal extends Application {
             guardarFichasPerfil(); // las fichas ya incluyen el bote ganado
             if (resultado != null) {
                 guardarManoEnHistorial(resultado.getGanador().getNombre(),
-                        resultado.getFichasGanadas(), resultado.getCombinacionGanadora());
+                        resultado.getFichasGanadas(), resultado.getCombinacionGanadora().name());
                 mostrarFinDeRonda(resultado.getGanador().getNombre(),
                         resultado.getFichasGanadas(), resultado.getCombinacionGanadora());
             }
