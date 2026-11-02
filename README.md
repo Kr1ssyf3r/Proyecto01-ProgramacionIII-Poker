@@ -2,6 +2,12 @@
 
 Aplicación de escritorio en JavaFX (Texas Hold'em contra dos bots). En el Proyecto 2 los datos dejan de vivir solo en memoria: se guardan en una base de datos MySQL a la que se accede por JDBC con el patrón DAO.
 
+## Funcionalidades nuevas del Proyecto 2
+- **Perfiles de jugador persistentes:** crear, listar, editar y eliminar perfiles de jugador humano (CRUD completo). Al iniciar se elige un perfil y la partida arranca con sus fichas; el saldo se guarda al terminar cada ronda.
+- **Historial de manos:** cada ronda terminada se guarda en MySQL (bote, combinación ganadora, ganador, fichas de cada jugador antes y después, y todas las acciones en orden).
+- **Estadísticas:** pantalla *Historial y estadísticas* con las manos jugadas, las acciones de la mano seleccionada, el ranking de victorias, el mayor bote y el bot con más victorias.
+- **Hilos:** las operaciones con la base de datos (cargar perfiles, guardar fichas, guardar la mano, cargar el historial) se ejecutan en un `Task` con hilo aparte, para que la interfaz no se congele.
+
 ## Requisitos
 - JDK 21 o superior
 - Maven
@@ -14,10 +20,12 @@ Aplicación de escritorio en JavaFX (Texas Hold'em contra dos bots). En el Proye
 4. Cambiar `clave=` por la contraseña de **su** MySQL. Este archivo no se sube a Git.
 
 ## Ejecutar
+Desde la carpeta `PokerDeFichas` (donde está el `pom.xml`):
 ```
 cd PokerDeFichas
 mvn javafx:run
 ```
+Si se corre desde la raíz del repositorio, Maven da el error `No plugin found for prefix 'javafx'`.
 
 ## Estructura del repositorio
 ```
@@ -30,11 +38,12 @@ PokerDeFichas/
   db.properties.example
   pom.xml
   src/main/java/
-    dao/              Acceso a datos (ConexionBD y DAO)
+    dao/              Acceso a datos: ConexionBD, JugadorDAO, ManoDAO,
+                      EstadisticasDAO (interfaces) y sus implementaciones JDBC
     juego/            Lógica de la partida y estrategias de los bots
-    model/            Cartas, jugadores, manos, resultados
+    model/            Cartas, jugadores, perfiles, manos, resultados
     util/             Validaciones y excepciones
-    view/             Interfaz JavaFX
+    view/             Interfaz JavaFX (mesa, perfiles, historial)
 ```
 
 ## Modelo de datos
@@ -48,15 +57,20 @@ PokerDeFichas/
 ## Reparto del trabajo
 | Integrante | Responsabilidad |
 |---|---|
-| Cristian Coronado | Base de datos e infraestructura: esquema, diagrama, `ConexionBD`, Maven |
-| (nombre) | Perfiles de jugador: DAO y CRUD, pantalla, carga en hilo aparte |
-| (nombre) | Guardado de manos: DAO, transacción, hilo aparte |
-| (nombre) | Historial y estadísticas: consultas y pantalla |
+| Cristian Coronado Chávez | Base de datos e infraestructura: esquema, diagrama, `ConexionBD`, Maven. Guardado de manos (`ManoDAO`, transacción, hilo aparte). Integración del repositorio |
+| Valeria Bahena Mujica | Perfiles de jugador: DAO y CRUD, pantalla, carga en hilo aparte |
+| Kenan Joel Solis Brenes | Manual de usuario actualizado y pruebas |
+| Sebastián Hincapié Salazar | Historial y estadísticas: consultas y pantalla |
 
 ## Bitácora de IA
 | Fecha | Integrante | Herramienta | Para qué se usó | Qué sirvió / qué hubo que corregir |
 |---|---|---|---|---|
+| Oct 2026 | Cristian | Claude | Guía paso a paso para el esquema MySQL, el diagrama EER y la clase `ConexionBD` | Sirvió para entender el patrón DAO y las llaves; hubo que corregir la ruta de `db.properties` y el nombre del módulo del conector (`mysql.connector.j`) |
+| Oct 2026 | Cristian | Claude | Escribir `ManoDAO` y `ManoDAOJdbc` (transacción) e integrarlos en `VentanaPrincipal` | Sirvió para guardar la mano completa; hubo que corregir un campo duplicado y convertir la combinación a texto (`.name()`) |
+| Oct 2026 | Cristian | Claude | Ayuda con Git (merge, push rechazado) y con Maven en Windows (`mvn javafx:run`) | Sirvió para dejar `main` compilando; hubo que ejecutar Maven dentro de `PokerDeFichas` |
 | | | | | |
 
+*(Valeria, Kenan y Sebastián: agreguen aquí sus propias filas si usaron IA.)*
+
 ## Entrega
-Domingo 1 de noviembre.
+Domingo 1 de noviembre de 2026.
