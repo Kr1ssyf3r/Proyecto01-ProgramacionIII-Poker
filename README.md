@@ -68,7 +68,7 @@ PokerDeFichas/
 | Oct 2026 | Cristian | Claude | Guía paso a paso para el esquema MySQL, el diagrama EER y la clase `ConexionBD` | Sirvió para entender el patrón DAO y las llaves; hubo que corregir la ruta de `db.properties` y el nombre del módulo del conector (`mysql.connector.j`) |
 | Oct 2026 | Cristian | Claude | Escribir `ManoDAO` y `ManoDAOJdbc` (transacción) e integrarlos en `VentanaPrincipal` | Sirvió para guardar la mano completa; hubo que corregir un campo duplicado y convertir la combinación a texto (`.name()`) |
 | Oct 2026 | Cristian | Claude | Ayuda con Git (merge, push rechazado) y con Maven en Windows (`mvn javafx:run`) | Sirvió para dejar `main` compilando; hubo que ejecutar Maven dentro de `PokerDeFichas` |
-| Nov 2026|
+| Nov 2026| Sebastian | Claude | Escribir "EstadisticasDAO" y poder integrarlo al proyecto | Me ayudó a entender los patrones DAO y como integrar código SQL en este tipo de proyectos |
 | | | | | |
 
 *(Valeria, Kenan y Sebastián: agreguen aquí sus propias filas si usaron IA.)*
