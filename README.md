@@ -59,7 +59,7 @@ PokerDeFichas/
 |---|---|
 | Cristian Coronado Chávez | Base de datos e infraestructura: esquema, diagrama, `ConexionBD`, Maven. Guardado de manos (`ManoDAO`, transacción, hilo aparte). Integración del repositorio |
 | Valeria Bahena Mujica | Perfiles de jugador: DAO y CRUD, pantalla, carga en hilo aparte |
-| Kenan Joel Solis Brenes | Manual de usuario actualizado y pruebas |
+| Kenan Joel Solis Brenes | Manual de usuario actualizado y pruebas, guardado de manos poker en base de datos. |
 | Sebastián Hincapié Salazar | Historial y estadísticas: consultas y pantalla |
 
 ## Bitácora de IA
@@ -69,6 +69,7 @@ PokerDeFichas/
 | Oct 2026 | Cristian | Claude | Escribir `ManoDAO` y `ManoDAOJdbc` (transacción) e integrarlos en `VentanaPrincipal` | Sirvió para guardar la mano completa; hubo que corregir un campo duplicado y convertir la combinación a texto (`.name()`) |
 | Oct 2026 | Cristian | Claude | Ayuda con Git (merge, push rechazado) y con Maven en Windows (`mvn javafx:run`) | Sirvió para dejar `main` compilando; hubo que ejecutar Maven dentro de `PokerDeFichas` |
 | Nov 2026| Sebastian | Claude | Escribir "EstadisticasDAO" y poder integrarlo al proyecto | Me ayudó a entender los patrones DAO y como integrar código SQL en este tipo de proyectos |
+| Oct 2026 | Kenan | Claudio | Guias para conectar la base de datos el proyecto en java. | Me ayudo de manera didactica a entender como aplicar las bases de datos y a ver distintas opciones de integración con el proyecto.|
 | | | | | |
 
 *(Valeria, Kenan y Sebastián: agreguen aquí sus propias filas si usaron IA.)*
