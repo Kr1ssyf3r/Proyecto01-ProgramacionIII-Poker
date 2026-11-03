@@ -70,9 +70,11 @@ PokerDeFichas/
 | Oct 2026 | Cristian | Claude | Ayuda con Git (merge, push rechazado) y con Maven en Windows (`mvn javafx:run`) | Sirvió para dejar `main` compilando; hubo que ejecutar Maven dentro de `PokerDeFichas` |
 | Nov 2026| Sebastian | Claude | Escribir "EstadisticasDAO" y poder integrarlo al proyecto | Me ayudó a entender los patrones DAO y como integrar código SQL en este tipo de proyectos |
 | Oct 2026 | Kenan | Claudio | Guias para conectar la base de datos el proyecto en java. | Me ayudo de manera didactica a entender como aplicar las bases de datos y a ver distintas opciones de integración con el proyecto.|
-| | | | | |
-
-*(Valeria, Kenan y Sebastián: agreguen aquí sus propias filas si usaron IA.)*
+| Oct 2026 | Valeria | Claude | Guía para poder implementar completos los perfiles para el CRUD como primera versión| Me ayudó para hacer correctamente la estructura del DAO, el 'PreparedStatement' y el 'Task'. Y para corregir asumía paquetes que no teníamos en el repo. |
+| Oct 2026 | Valeria | Claude | Adaptar el repo real donde subi lo que llevabamos al momento para poder adaptar los paquetes| Sirvió bien para poder empezar a probarlo con lo que tenía ya hecho y compiló bien |
+| Oct 2026 | Valeria | Claude | Aclaración de duda sobre los perfiles en 'VentanaPrincipal.java' | Se separaba start() inicialmente de iniciarPartida() y guardar en un 'Task' y ya más adelante Cristian me ayudó con el conflicto del merge al momento de separar lo hecho. |
+| Oct 2026 | Valeria | Claude | Aclaración sobre los constructores de 'PerfilJugador.java' | Se explicó que un constructor debe llamarse igual a la clase y se propusieron métodos de fábrica 'nuevo()' y 'existente()', al final se dejó como estaba... |
+| Oct 2026 | Valeria | Claude | Se redactó una guía general sobre el módulo para el grupo| Sirvió como guía de estudio más visual para estudiar el código de mejor manera en caso de alguna duda sobre el funcionamiento |
 
 ## Entrega
 Domingo 1 de noviembre de 2026.
